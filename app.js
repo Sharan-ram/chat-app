@@ -30,43 +30,44 @@ io.sockets.on("connection", function(socket) {
 
     socket.join("room1");
 
-    socket.emit("updatechat", "SERVER", "you have connected to room1");
+    socket.emit("updatechat", "admin", "you have connected to room1");
 
     socket.broadcast
       .to("room1")
-      .emit("updatechat", "SERVER", username + " has connected to this room");
+      .emit("updatechat", "admin", username + " has connected to this room");
     socket.emit("updaterooms", rooms, "room1");
   });
 
   socket.on("sendchat", function(data) {
-    io.sockets.in(socket.room).emit("updatechat", socket.username, data);
+    io.in(socket.room).emit("updatechat", socket.username, data);
   });
 
   socket.on("switchRoom", function(newroom) {
+    console.log(newroom);
     socket.leave(socket.room);
 
     socket.join(newroom);
-    socket.emit("updatechat", "SERVER", "you have connected to " + newroom);
+    socket.emit("updatechat", "admin", "you have connected to " + newroom);
 
     socket.broadcast
       .to(socket.room)
-      .emit("updatechat", "SERVER", socket.username + " has left this room");
+      .emit("updatechat", "admin", socket.username + " has left this room");
 
     socket.room = newroom;
     socket.broadcast
       .to(newroom)
-      .emit("updatechat", "SERVER", socket.username + " has joined this room");
+      .emit("updatechat", "admin", socket.username + " has joined this room");
     socket.emit("updaterooms", rooms, newroom);
   });
 
   socket.on("disconnect", function() {
     delete usernames[socket.username];
 
-    io.sockets.emit("updateusers", usernames);
+    io.emit("updateusers", usernames);
 
     socket.broadcast.emit(
       "updatechat",
-      "SERVER",
+      "admin",
       socket.username + " has disconnected"
     );
     socket.leave(socket.room);
