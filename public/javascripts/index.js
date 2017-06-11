@@ -3,21 +3,11 @@ var socket = io();
 socket.emit("adduser", prompt("What's your name?"));
 
 socket.on("updatechat", function(username, data) {
-  let boldNode = document.createElement("b");
-  let hNode = document.createElement("h3");
-  hNode.setAttribute("class", "username");
-  let hNodeText = document.createTextNode(username + ":");
-  hNode.appendChild(hNodeText);
-  boldNode.appendChild(hNode);
+  let templ = "<b><h3>" + username + "</h3></b> <p>" + data + "</p>";
 
-  let pNode = document.createElement("p");
-  let pNodeText = document.createTextNode(data);
-  pNode.appendChild(pNodeText);
-
-  document
-    .getElementById("conversation")
-    .appendChild(boldNode)
-    .appendChild(pNode);
+  let xnode = document.createElement("div");
+  xnode.innerHTML = templ;
+  document.getElementById("conversation").appendChild(xnode);
 });
 
 socket.on("updaterooms", function(rooms, current_room) {
@@ -34,6 +24,7 @@ socket.on("updaterooms", function(rooms, current_room) {
       let hNode = document.createElement("h3");
       let aNode = document.createElement("a");
       aNode.setAttribute("href", "#");
+
       let aNodeText = document.createTextNode(room);
       aNode.appendChild(aNodeText);
       hNode.appendChild(aNode);
