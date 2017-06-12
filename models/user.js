@@ -60,6 +60,19 @@ class User {
       cb(null, new User(user));
     });
   }
+  static authenticate(name, pass, cb) {
+    User.getByName(name, (err, user) => {
+      if (err) return cb(err);
+      if (!user.id) return cb();
+      bcrypt.hash(pass, user.salt, (err, hash) => {
+        if (err) return cb(err);
+        if (hash === user.hash) {
+          return cb(null, user);
+        }
+        cb();
+      });
+    });
+  }
 }
 
 module.exports = User;
