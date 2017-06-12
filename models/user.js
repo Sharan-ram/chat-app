@@ -3,8 +3,8 @@ const bcrypt = require("bcrypt");
 const db = redis.createClient();
 
 class User {
+  //storing a user to a database
   constructor(obj) {
-    super();
     for (let key in obj) {
       this[key] = obj[key];
     }
@@ -38,8 +38,26 @@ class User {
       this.salt = salt;
       bcrypt.hash(this.pass, salt, (err, hash) => {
         if (err) return cb(err);
+        this.pass = hash;
         cb();
       });
+    });
+  }
+  // fetching the user from redis based on their name
+  static getByName(name, cb) {
+    User.getId(name, (err, id) => {
+      if (err) return cb(err);
+      User.get(id, cb);
+    });
+  }
+  static getId(name, cb) {
+    db.get(`user:id:${name}`, cb);
+  }
+
+  static get(id, cb) {
+    db.hgetall(`user:${id}`, (err, user) => {
+      if (err) return cb(err);
+      cb(null, new User(user));
     });
   }
 }
