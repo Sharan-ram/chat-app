@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>
+    <%= title %>
+  </title>
+</head>
+<body>
+  <h3>Enter your username and password to login</h3>
+  <% include messages %>
+  <form action = '/login' method = 'POST'>
+    <input type= "text" name = "username" placeholder="username"><br><br>
+    <input type = "password" name = "password" placeholder="password"><br><br>
+    <input type = "submit" value="Login">
+  </form>
+</body>
+</html>

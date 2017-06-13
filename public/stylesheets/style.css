@@ -7,7 +7,7 @@
   height:300px;
   padding:10px;
   overflow:hidden;
-  background-color: #EFE9E8;
+  background-color: #F2F3F5;
 }
 
 #conversation-div {
@@ -22,7 +22,8 @@
 
 }
 a {
-  text-decoration:none
+  text-decoration:none;
+  color:#536493;
 }
 .username {
   color:#F30C0F
@@ -31,4 +32,5 @@ a {
 #datasend {
   background-color: #DDE3F3;
   width:50px;
+
 }

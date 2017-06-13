@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+</head>
+<body>
+  <h3>Fill your details to register</h3>
+  <% include messages %>
+  <br>
+  <form action = '/register' method = "POST">
+    <input type = "text" name="username" placeholder="username"><br><br>
+    <input type = "password" name = "userpass" placeholder = 'password'><br><br>
+    <input type = "submit" value = "sign up">
+  </form>
+</body>
+</html>
