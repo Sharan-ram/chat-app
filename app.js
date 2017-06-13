@@ -9,6 +9,7 @@ const messages = require("./middleware/messages.js");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const login = require("./routes/login");
+const user = require("./middleware/user");
 
 // rendering ejs
 app.set("views", path.join(__dirname, "views"));
@@ -25,10 +26,15 @@ app.use(
     saveUninitialized: true
   })
 );
+app.use(user);
 app.use(messages);
 // on get request to '/' render index.ejs
 app.get("/", (req, res) => {
-  res.render("index", { title: "Chat App" });
+  if (req.session.uid) {
+    res.render("index", { title: "Chat App" });
+  } else {
+    res.render("login", { title: "login" });
+  }
 });
 app.get("/register", register.form);
 app.post("/register", register.submit);
@@ -39,7 +45,7 @@ var usernames = {};
 
 var rooms = ["room1", "room2", "room3"];
 
-io.sockets.on("connection", function(socket) {
+io.on("connection", function(socket) {
   socket.on("adduser", function(username) {
     socket.username = username;
     socket.room = "room1";
