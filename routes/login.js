@@ -4,12 +4,14 @@ exports.form = (req, res) => {
 };
 exports.submit = (req, res, next) => {
   const data = req.body;
-  console.log(data["username"], data["password"]);
+  //console.log(data["username"], data["password"]);
   User.authenticate(data["username"], data["password"], (err, user) => {
     if (err) return next(err);
     if (user) {
+      //console.log(user);
       req.session.uid = user.id;
-      res.redirect("/");
+      req.session.name = user.name;
+      res.render("index", { title: "chat app", name: req.session.name });
     } else {
       res.error("invalid credentials");
       res.redirect("back");

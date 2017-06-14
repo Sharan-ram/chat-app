@@ -26,16 +26,14 @@ app.use(
     saveUninitialized: true
   })
 );
-app.use(user);
+//app.use(user);
 app.use(messages);
 // on get request to '/' render index.ejs
+
 app.get("/", (req, res) => {
-  if (req.session.uid) {
-    res.render("index", { title: "Chat App" });
-  } else {
-    res.render("login", { title: "login" });
-  }
+  res.render("login", { title: "Login" });
 });
+
 app.get("/register", register.form);
 app.post("/register", register.submit);
 app.get("/login", login.form);

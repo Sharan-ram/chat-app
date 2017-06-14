@@ -16,8 +16,9 @@ exports.submit = (req, res, next) => {
       user.save(err => {
         if (err) return next(err);
         req.session.id = user.id;
+        req.session.name = user.name;
         console.log(req.session.id);
-        res.redirect("/");
+        res.render("index", { title: "Chat app", name: req.session.name });
       });
     }
   });

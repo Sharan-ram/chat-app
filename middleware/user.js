@@ -1,4 +1,4 @@
-const User = require("../models/user");
+/*const User = require("../models/user");
 
 module.exports = (req, res, next) => {
   const uid = req.session.uid;
@@ -9,3 +9,4 @@ module.exports = (req, res, next) => {
     next();
   });
 };
+*/

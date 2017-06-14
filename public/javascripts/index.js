@@ -1,9 +1,10 @@
-var socket = io();
-
-socket.emit("adduser", prompt("What's your name?"));
+const socket = io();
+const name = document.getElementById("name").innerHTML;
+socket.emit("adduser", name);
 
 socket.on("updatechat", function(username, data) {
-  let templ = "<b><h3>" + username + "</h3></b> <p>" + data + "</p>";
+  let templ =
+    "<b><h3 class='username'>" + username + "</h3></b> <p>" + data + "</p>";
 
   let xnode = document.createElement("div");
   xnode.innerHTML = templ;
