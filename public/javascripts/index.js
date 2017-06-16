@@ -39,7 +39,7 @@ socket.on("updaterooms", function(rooms, current_room) {
   });
 });
 function switchRoom(room) {
-  console.log(room);
+  //console.log(room);
   socket.emit("switchRoom", room);
 }
 

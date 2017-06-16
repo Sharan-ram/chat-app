@@ -10,6 +10,8 @@ const session = require("express-session");
 const bodyParser = require("body-parser");
 const login = require("./routes/login");
 const user = require("./middleware/user");
+const redis = require("redis");
+const db = redis.createClient();
 
 // rendering ejs
 app.set("views", path.join(__dirname, "views"));
@@ -65,7 +67,19 @@ io.on("connection", function(socket) {
     socket.emit("updaterooms", rooms, "room1");
   });
   socket.on("saveChat", (username, data, room) => {
-    console.log(username, data, room);
+    //console.log(username, data, room);
+    //console.log("the current room is:" + room);
+    db.incr(`message:ids`, (err, id) => {
+      if (err) return next(err);
+      db.hmset(`message:${id}`, "room", room, "data", data);
+      db.lpush(username, JSON.stringify(`message:${id}`));
+      db.lindex(username, 0, (err, res) => {
+        let obj = JSON.parse(res);
+        db.hgetall(obj, (err, hash) => {
+          console.log(hash);
+        });
+      });
+    });
   });
 
   socket.on("sendchat", function(data) {
@@ -73,7 +87,7 @@ io.on("connection", function(socket) {
   });
 
   socket.on("switchRoom", function(newroom) {
-    console.log(newroom);
+    //console.log(newroom);
     socket.leave(socket.room);
     socket.join(newroom);
     socket.emit(
