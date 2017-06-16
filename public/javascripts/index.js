@@ -2,13 +2,14 @@ const socket = io();
 const name = document.getElementById("name").innerHTML;
 socket.emit("adduser", name);
 
-socket.on("updatechat", function(username, data) {
+socket.on("updatechat", function(username, data, room) {
   let templ =
     "<b><h3 class='username'>" + username + "</h3></b> <p>" + data + "</p>";
 
   let xnode = document.createElement("div");
   xnode.innerHTML = templ;
   document.getElementById("conversation").appendChild(xnode);
+  socket.emit("saveChat", username, data, room);
 });
 
 socket.on("updaterooms", function(rooms, current_room) {
