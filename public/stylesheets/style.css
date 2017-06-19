@@ -11,15 +11,12 @@
   background-color: #F2F3F5;
 }
 
-#conversation-div {
-  float:left;
-  width:300px;
-  height:250px;
-  overflow:scroll;
-
-}
 #conversation {
   margin:10px;
+  float:left;
+  width:300px;
+  height:500px;
+  overflow:scroll;
 
 }
 a {
@@ -37,4 +34,7 @@ a {
 }
 #rooms {
   height:100%
+}
+.message {
+  clear:left
 }

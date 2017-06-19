@@ -58,25 +58,13 @@ io.on("connection", function(socket) {
         });
       });
     });
-    socket.emit(
-      "updatechat",
-      "admin",
-      "you have connected to room1",
-      socket.room
-    );
-    socket.broadcast
-      .to("room1")
-      .emit(
-        "updatechat",
-        "admin",
-        username + " has connected to this room",
-        socket.room
-      );
+
     db.lrange("rooms", 0, -1, (err, res) => {
       if (err) return next(err);
       socket.emit("updaterooms", res, "room1");
     });
   });
+
   socket.on("saveChat", (username, data, room) => {
     //console.log(username, data, room);
     //console.log("the current room is:" + room);
@@ -95,29 +83,8 @@ io.on("connection", function(socket) {
     //console.log(newroom);
     socket.leave(socket.room);
     socket.join(newroom);
-    socket.emit(
-      "updatechat",
-      "admin",
-      "you have connected to " + newroom,
-      newroom
-    );
-    socket.broadcast
-      .to(socket.room)
-      .emit(
-        "updatechat",
-        "admin",
-        socket.username + " has left this room",
-        socket.room
-      );
     socket.room = newroom;
-    socket.broadcast
-      .to(newroom)
-      .emit(
-        "updatechat",
-        "admin",
-        socket.username + " has joined this room",
-        socket.room
-      );
+
     db.lrange("rooms", 0, -1, (err, res) => {
       if (err) return next(err);
       socket.emit("updaterooms", res, socket.room);
@@ -125,12 +92,6 @@ io.on("connection", function(socket) {
   });
 
   socket.on("disconnect", function() {
-    socket.broadcast.emit(
-      "updatechat",
-      "admin",
-      socket.username + " has disconnected",
-      socket.room
-    );
     socket.leave(socket.room);
   });
 });
