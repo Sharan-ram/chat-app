@@ -1,13 +1,11 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html {
-  height:100%
-}
+
 
 #room-div {
   float:left;
   width:100px;
   border-right:1px solid black;
-  height:100%;
+  height:500px;
   padding:10px;
   overflow:hidden;
   background-color: #F2F3F5;

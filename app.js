@@ -48,6 +48,16 @@ io.on("connection", function(socket) {
     socket.room = "room1";
 
     socket.join("room1");
+    db.lrange(socket.room, 0, -1, (err, res) => {
+      if (err) return next(err);
+      res.forEach(item => {
+        let obj = JSON.parse(item);
+        db.hgetall(obj, (err, resObj) => {
+          if (err) return next(err);
+          socket.emit("renderChat", resObj);
+        });
+      });
+    });
     socket.emit(
       "updatechat",
       "admin",
