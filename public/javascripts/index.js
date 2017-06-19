@@ -1,63 +1,46 @@
 const socket = io();
 const name = document.getElementById("name").innerHTML;
-socket.emit("adduser", name);
-socket.on("renderChat", roomObj => {
-  let templ =
-    "<b><h3 class='username'>" +
-    roomObj.username +
-    "</h3></b> <p>" +
-    roomObj.data +
-    "</p>";
+socket.emit("addUser", name);
 
-  let xnode = document.createElement("div");
-  xnode.innerHTML = templ;
-  document.getElementById("conversation").appendChild(xnode);
-});
-socket.on("updatechat", function(username, data, room) {
-  let templ =
-    "<b><h3 class='username'>" + username + "</h3></b> <p>" + data + "</p>";
-
-  let xnode = document.createElement("div");
-  xnode.innerHTML = templ;
-  document.getElementById("conversation").appendChild(xnode);
-  socket.emit("saveChat", username, data, room);
-});
-
-socket.on("updaterooms", function(rooms, current_room) {
-  let roomNode = document.getElementById("room-div");
-  roomNode.innerHTML = "";
-  rooms.forEach(room => {
-    if (room === current_room) {
-      let hNode = document.createElement("h3");
-      let hNodeText = document.createTextNode(room);
-      hNode.appendChild(hNodeText);
-
-      document.getElementById("room-div").appendChild(hNode);
-    } else {
-      let hNode = document.createElement("h3");
-      let aNode = document.createElement("a");
-      aNode.setAttribute("href", "#");
-
-      let aNodeText = document.createTextNode(room);
-      aNode.appendChild(aNodeText);
-      hNode.appendChild(aNode);
-      document.getElementById("room-div").appendChild(hNode);
-      let localroom = room;
-      aNode.onclick = () => {
-        switchRoom(localroom);
-      };
-    }
+socket.on("renderRooms", roomArr => {
+  roomArr.forEach(room => {
+    let templ = "<h3>" + room + "</h3>";
+    let anode = document.createElement("a");
+    anode.setAttribute("href", "#");
+    anode.innerHTML = templ;
+    document.getElementById("room-div").appendChild(anode);
+    anode.onclick = () => {
+      switchRoom(room);
+    };
   });
 });
-function switchRoom(room) {
-  //console.log(room);
-  socket.emit("switchRoom", room);
-}
 
-let datasend = document.getElementById("datasend");
-datasend.onclick = () => {
-  let data = document.getElementById("data");
-  let message = data.value;
-  data.value = "";
-  socket.emit("sendchat", message);
+socket.on("renderRoomContent", obj => {
+  //document.getElementById("conversation").innerHTML = "";
+  let templ =
+    "<h3 class='username'>" + obj.username + "</h3> <p>" + obj.data + "</p>";
+  let divNode = document.createElement("div");
+  divNode.innerHTML = templ;
+  document.getElementById("conversation").appendChild(divNode);
+});
+
+socket.on("clearDom", current_room => {
+  document.getElementById("conversation").innerHTML = "";
+});
+
+let sendButton = document.getElementById("datasend");
+sendButton.onclick = () => {
+  let dataElement = document.getElementById("data");
+  let data = dataElement.value;
+  dataElement.value = "";
+  //console.log(socket.room, socket.username);
+  socket.emit("saveText", data);
 };
+
+const switchRoom = current_room => {
+  socket.emit("loadRoomContent", current_room);
+};
+
+socket.on("updateChat", room => {
+  socket.emit("renderChatToEveryone", room);
+});

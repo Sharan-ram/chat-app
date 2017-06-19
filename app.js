@@ -42,52 +42,55 @@ app.get("/login", login.form);
 app.post("/login", login.submit);
 app.get("/logout", login.logout);
 
+let defaultRoom = "";
 io.on("connection", function(socket) {
-  socket.on("adduser", function(username) {
-    socket.username = username;
-    socket.room = "room1";
+  socket.on("addUser", name => {
+    socket.room = defaultRoom;
+    socket.username = name;
 
-    socket.join("room1");
-    db.lrange(socket.room, 0, -1, (err, res) => {
+    db.lrange("rooms", 0, -1, (err, roomArr) => {
       if (err) return next(err);
-      res.forEach(item => {
-        let obj = JSON.parse(item);
-        db.hgetall(obj, (err, resObj) => {
-          if (err) return next(err);
-          socket.emit("renderChat", resObj);
+      socket.emit("renderRooms", roomArr);
+    });
+  });
+
+  socket.on("loadRoomContent", current_room => {
+    socket.leave(socket.room);
+    socket.join(current_room);
+    socket.room = current_room;
+    //console.log(socket.room, socket.username);
+    socket.emit("clearDom", socket.room);
+    db.lrange(socket.room, 0, -1, (err, roomContent) => {
+      if (err) return next(err);
+      //console.log("content of a room  in an array ", roomContent);
+      roomContent.forEach(message => {
+        message = message.replace(/\"/g, "");
+        db.hgetall(message, (err, msgObj) => {
+          socket.emit("renderRoomContent", msgObj);
         });
       });
     });
+  });
 
-    db.lrange("rooms", 0, -1, (err, res) => {
-      if (err) return next(err);
-      socket.emit("updaterooms", res, "room1");
+  socket.on("saveText", data => {
+    db.incr("message:ids", (err, id) => {
+      db.hmset(`message:${id}`, "username", socket.username, "data", data);
+      db.rpush(socket.room, JSON.stringify(`message:${id}`));
+      io.in(socket.room).emit("updateChat", socket.room);
     });
   });
 
-  socket.on("saveChat", (username, data, room) => {
-    //console.log(username, data, room);
-    //console.log("the current room is:" + room);
-    db.incr(`message:ids`, (err, id) => {
+  socket.on("renderChatToEveryone", room => {
+    socket.emit("clearDom", socket.room);
+    db.lrange(socket.room, 0, -1, (err, roomContent) => {
       if (err) return next(err);
-      db.hmset(`message:${id}`, "username", username, "data", data);
-      db.rpush(room, JSON.stringify(`message:${id}`));
-    });
-  });
-
-  socket.on("sendchat", function(data) {
-    io.in(socket.room).emit("updatechat", socket.username, data, socket.room);
-  });
-
-  socket.on("switchRoom", function(newroom) {
-    //console.log(newroom);
-    socket.leave(socket.room);
-    socket.join(newroom);
-    socket.room = newroom;
-
-    db.lrange("rooms", 0, -1, (err, res) => {
-      if (err) return next(err);
-      socket.emit("updaterooms", res, socket.room);
+      //console.log("content of a room  in an array ", roomContent);
+      roomContent.forEach(message => {
+        message = message.replace(/\"/g, "");
+        db.hgetall(message, (err, msgObj) => {
+          socket.emit("renderRoomContent", msgObj);
+        });
+      });
     });
   });
 
