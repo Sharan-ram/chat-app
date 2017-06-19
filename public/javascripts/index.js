@@ -9,11 +9,11 @@ socket.on("updatechat", function(username, data, room) {
   let xnode = document.createElement("div");
   xnode.innerHTML = templ;
   document.getElementById("conversation").appendChild(xnode);
-  socket.emit("save", username, data, room);
+  socket.emit("saveChat", username, data, room);
 });
 
 socket.on("updaterooms", function(rooms, current_room) {
-  let roomNode = document.getElementById("rooms");
+  let roomNode = document.getElementById("room-div");
   roomNode.innerHTML = "";
   rooms.forEach(room => {
     if (room === current_room) {
@@ -21,7 +21,7 @@ socket.on("updaterooms", function(rooms, current_room) {
       let hNodeText = document.createTextNode(room);
       hNode.appendChild(hNodeText);
 
-      document.getElementById("rooms").appendChild(hNode);
+      document.getElementById("room-div").appendChild(hNode);
     } else {
       let hNode = document.createElement("h3");
       let aNode = document.createElement("a");
@@ -30,7 +30,7 @@ socket.on("updaterooms", function(rooms, current_room) {
       let aNodeText = document.createTextNode(room);
       aNode.appendChild(aNodeText);
       hNode.appendChild(aNode);
-      document.getElementById("rooms").appendChild(hNode);
+      document.getElementById("room-div").appendChild(hNode);
       let localroom = room;
       aNode.onclick = () => {
         switchRoom(localroom);

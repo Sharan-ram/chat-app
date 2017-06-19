@@ -42,8 +42,6 @@ app.get("/login", login.form);
 app.post("/login", login.submit);
 app.get("/logout", login.logout);
 
-var rooms = ["room1", "room2", "room3"];
-
 io.on("connection", function(socket) {
   socket.on("adduser", function(username) {
     socket.username = username;
@@ -64,7 +62,10 @@ io.on("connection", function(socket) {
         username + " has connected to this room",
         socket.room
       );
-    socket.emit("updaterooms", rooms, "room1");
+    db.lrange("rooms", 0, -1, (err, res) => {
+      if (err) return next(err);
+      socket.emit("updaterooms", res, "room1");
+    });
   });
   socket.on("saveChat", (username, data, room) => {
     //console.log(username, data, room);
@@ -107,7 +108,10 @@ io.on("connection", function(socket) {
         socket.username + " has joined this room",
         socket.room
       );
-    socket.emit("updaterooms", rooms, socket.room);
+    db.lrange("rooms", 0, -1, (err, res) => {
+      if (err) return next(err);
+      socket.emit("updaterooms", res, socket.room);
+    });
   });
 
   socket.on("disconnect", function() {
