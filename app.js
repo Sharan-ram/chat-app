@@ -71,14 +71,8 @@ io.on("connection", function(socket) {
     //console.log("the current room is:" + room);
     db.incr(`message:ids`, (err, id) => {
       if (err) return next(err);
-      db.hmset(`message:${id}`, "room", room, "data", data);
-      db.lpush(username, JSON.stringify(`message:${id}`));
-      db.lindex(username, 0, (err, res) => {
-        let obj = JSON.parse(res);
-        db.hgetall(obj, (err, hash) => {
-          console.log(hash);
-        });
-      });
+      db.hmset(`message:${id}`, "username", username, "data", data);
+      db.rpush(room, JSON.stringify(`message:${id}`));
     });
   });
 

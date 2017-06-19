@@ -9,7 +9,7 @@ socket.on("updatechat", function(username, data, room) {
   let xnode = document.createElement("div");
   xnode.innerHTML = templ;
   document.getElementById("conversation").appendChild(xnode);
-  socket.emit("saveChat", username, data, room);
+  socket.emit("save", username, data, room);
 });
 
 socket.on("updaterooms", function(rooms, current_room) {
