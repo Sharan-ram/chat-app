@@ -48,8 +48,8 @@ io.on("connection", function(socket) {
     socket.username = name;
 
     db.lrange(socket.username, 0, -1, (err, roomArr) => {
-      if (err) return next(err);
-      socket.emit("renderRooms", roomArr);
+      if (err) console.log(err);
+      else socket.emit("renderRooms", roomArr);
     });
   });
 
@@ -58,9 +58,14 @@ io.on("connection", function(socket) {
     socket.join(current_room);
     socket.room = current_room;
     //console.log(socket.room, socket.username);
-    socket.emit("clearDom", socket.room);
+    socket.emit("clearConversationDom", socket.room);
+    db.lrange(`${socket.room}:users`, 0, -1, (err, users) => {
+      socket.emit("clearUsersDom", users);
+      socket.emit("displayUsers", users);
+    });
+
     db.lrange(socket.room, 0, -1, (err, roomContent) => {
-      if (err) return next(err);
+      if (err) console.log(err);
       //console.log("content of a room  in an array ", roomContent);
       roomContent.forEach(message => {
         message = message.replace(/\"/g, "");
@@ -73,6 +78,7 @@ io.on("connection", function(socket) {
 
   socket.on("saveText", data => {
     db.incr("message:ids", (err, id) => {
+      if (err) console.log(err);
       db.hmset(`message:${id}`, "username", socket.username, "data", data);
       db.rpush(socket.room, JSON.stringify(`message:${id}`));
       io.in(socket.room).emit("updateChat", socket.room);
@@ -80,9 +86,9 @@ io.on("connection", function(socket) {
   });
 
   socket.on("renderChatToEveryone", room => {
-    socket.emit("clearDom", socket.room);
+    socket.emit("clearConversationDom", socket.room);
     db.lrange(socket.room, 0, -1, (err, roomContent) => {
-      if (err) return next(err);
+      if (err) console.log(err);
       //console.log("content of a room  in an array ", roomContent);
       roomContent.forEach(message => {
         message = message.replace(/\"/g, "");
@@ -93,8 +99,10 @@ io.on("connection", function(socket) {
     });
   });
 
-  socket.on("addGroup", (groupName, admin) => {
+  socket.on("addGroup", (groupName, user) => {
     db.lpush(socket.username, groupName);
+    db.lpush(`${groupName}:users`, user, socket.username);
+    db.lpush(user, groupName);
     db.lrange(socket.username, 0, -1, (err, roomArr) => {
       socket.emit("renderRooms", roomArr);
     });

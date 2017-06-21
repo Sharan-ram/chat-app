@@ -25,8 +25,20 @@ socket.on("renderRoomContent", obj => {
   document.getElementById("conversation").appendChild(divNode);
 });
 
-socket.on("clearDom", current_room => {
+socket.on("clearConversationDom", current_room => {
   document.getElementById("conversation").innerHTML = "";
+});
+
+socket.on("clearUsersDom", users => {
+  document.getElementById("users").innerHTML = "";
+});
+
+socket.on("displayUsers", users => {
+  users.forEach(user => {
+    let hnode = document.createElement("h3");
+    hnode.innerHTML = user;
+    document.getElementById("users").appendChild(hnode);
+  });
 });
 
 let sendButton = document.getElementById("datasend");
@@ -52,7 +64,7 @@ group.onclick = () => {
   roomDiv.innerHTML =
     "<input type = 'text' name = 'groupName' placeholder = 'Group Name' id = 'groupName'>" +
     "<br/><br/>" +
-    "<input type = 'text' name = 'username' placeholder='add admin' id = 'admin'>" +
+    "<input type = 'text' name = 'username' placeholder='add user' id = 'admin'>" +
     "<br/><br/>" +
     "<input type = 'button' value = 'Create Group' id = 'createGroupButton'>";
   let createGroupButton = document.getElementById("createGroupButton");

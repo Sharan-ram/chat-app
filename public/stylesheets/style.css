@@ -19,6 +19,15 @@
   overflow:scroll;
 
 }
+#users {
+  width:150px;
+  border-left:1px solid black;
+  height:500px;
+  padding:10px;
+  overflow:hidden;
+  background-color: #F2F3F5;
+}
+
 a {
   text-decoration:none;
   color:#536493;

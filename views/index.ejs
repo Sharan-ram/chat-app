@@ -14,21 +14,21 @@
     <input type="submit" value="Logout">
   </form>
 
-<div>
-	<div id="conversation"></div> <br>
-  <div class = "message">
-  	<input id="data" style="width:200px;" />
-  	<input type="button" id="datasend" value="send" /><br><br>
-
+  <div>
+  	<div id="conversation"></div> <div id = 'users'></div>
   </div>
 
-</div>
+  <div class = "message">
+    <input id="data" style="width:200px;" />
+    <input type="button" id="datasend" value="send" /><br><br>
+  </div>
+
   <div id = "addGroup">
     <a href = "#" id="createGroup">Create Group</a>
   </div>
 
   <script src = "/socket.io/socket.io.js"></script>
   <script src = "/javascripts/index.js"></script>
-  
+
 </body>
 </html>
