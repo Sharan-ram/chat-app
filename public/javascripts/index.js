@@ -3,6 +3,7 @@ const name = document.getElementById("name").innerHTML;
 socket.emit("addUser", name);
 
 socket.on("renderRooms", roomArr => {
+  document.getElementById("room-div").innerHTML = "";
   roomArr.forEach(room => {
     let templ = "<h3>" + room + "</h3>";
     let anode = document.createElement("a");
@@ -44,3 +45,21 @@ const switchRoom = current_room => {
 socket.on("updateChat", room => {
   socket.emit("renderChatToEveryone", room);
 });
+
+let group = document.getElementById("createGroup");
+group.onclick = () => {
+  let roomDiv = document.getElementById("room-div");
+  roomDiv.innerHTML =
+    "<input type = 'text' name = 'groupName' placeholder = 'Group Name' id = 'groupName'>" +
+    "<br/><br/>" +
+    "<input type = 'text' name = 'username' placeholder='add admin' id = 'admin'>" +
+    "<br/><br/>" +
+    "<input type = 'button' value = 'Create Group' id = 'createGroupButton'>";
+  let createGroupButton = document.getElementById("createGroupButton");
+
+  createGroupButton.onclick = () => {
+    let groupName = document.getElementById("groupName").value;
+    let admin = document.getElementById("admin").value;
+    socket.emit("addGroup", groupName, admin);
+  };
+};

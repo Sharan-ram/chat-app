@@ -9,7 +9,6 @@ const messages = require("./middleware/messages.js");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const login = require("./routes/login");
-const user = require("./middleware/user");
 const redis = require("redis");
 const db = redis.createClient();
 
@@ -48,7 +47,7 @@ io.on("connection", function(socket) {
     socket.room = defaultRoom;
     socket.username = name;
 
-    db.lrange("rooms", 0, -1, (err, roomArr) => {
+    db.lrange(socket.username, 0, -1, (err, roomArr) => {
       if (err) return next(err);
       socket.emit("renderRooms", roomArr);
     });
@@ -91,6 +90,13 @@ io.on("connection", function(socket) {
           socket.emit("renderRoomContent", msgObj);
         });
       });
+    });
+  });
+
+  socket.on("addGroup", (groupName, admin) => {
+    db.lpush(socket.username, groupName);
+    db.lrange(socket.username, 0, -1, (err, roomArr) => {
+      socket.emit("renderRooms", roomArr);
     });
   });
 
