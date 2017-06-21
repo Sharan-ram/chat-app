@@ -59,8 +59,9 @@ io.on("connection", function(socket) {
     socket.room = current_room;
     //console.log(socket.room, socket.username);
     socket.emit("clearConversationDom", socket.room);
+    socket.emit("addNewUser", socket.room);
     db.lrange(`${socket.room}:users`, 0, -1, (err, users) => {
-      socket.emit("clearUsersDom", users);
+      //socket.emit("clearUsersDom", users);
       socket.emit("displayUsers", users);
     });
 
@@ -73,6 +74,16 @@ io.on("connection", function(socket) {
           socket.emit("renderRoomContent", msgObj);
         });
       });
+    });
+  });
+  socket.on("saveNewUser", name => {
+    db.lpush(`${socket.room}:users`, name);
+    db.lpush(name, socket.room);
+    db.lrange(`${socket.room}:users`, 0, -1, (err, users) => {
+      if (err) console.log(err);
+      else
+        //socket.emit("clearUsersDom", users);
+        socket.emit("displayUsers", users);
     });
   });
 
