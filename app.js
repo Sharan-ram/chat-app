@@ -11,7 +11,10 @@ const bodyParser = require("body-parser");
 const login = require("./routes/login");
 const redis = require("redis");
 const db = redis.createClient();
-
+const getUserGroups = require("./models/getUserGroups");
+const getUsersFromGroup = require("./models/getUsersFromGroup");
+const groupContent = require("./models/groupContent");
+const messageContent = require("./models/messageContent");
 // rendering ejs
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -43,11 +46,13 @@ app.get("/logout", login.logout);
 
 let defaultRoom = "";
 io.on("connection", function(socket) {
+  //console.log(socket.id);
   socket.on("addUser", name => {
     socket.room = defaultRoom;
     socket.username = name;
 
-    db.lrange(socket.username, 0, -1, (err, roomArr) => {
+    getUserGroups.get(socket.username, (err, roomArr) => {
+      //console.log(roomArr);
       if (err) console.log(err);
       else socket.emit("renderRooms", roomArr);
     });
@@ -60,17 +65,18 @@ io.on("connection", function(socket) {
     //console.log(socket.room, socket.username);
     socket.emit("clearConversationDom", socket.room);
     socket.emit("addNewUser", socket.room);
-    db.lrange(`${socket.room}:users`, 0, -1, (err, users) => {
+    getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
+      //console.log(users);
       //socket.emit("clearUsersDom", users);
       socket.emit("displayUsers", users);
     });
 
-    db.lrange(socket.room, 0, -1, (err, roomContent) => {
+    groupContent.get(socket.room, (err, roomContent) => {
       if (err) console.log(err);
       //console.log("content of a room  in an array ", roomContent);
       roomContent.forEach(message => {
         message = message.replace(/\"/g, "");
-        db.hgetall(message, (err, msgObj) => {
+        messageContent.get(message, (err, msgObj) => {
           socket.emit("renderRoomContent", msgObj);
         });
       });
