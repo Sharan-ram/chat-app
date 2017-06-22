@@ -11,7 +11,7 @@ exports.submit = (req, res, next) => {
       //console.log(user);
       req.session.uid = user.id;
       req.session.name = user.name;
-      res.render("index", { title: "chat app", name: req.session.name });
+      res.redirect("/chat");
     } else {
       res.error("invalid credentials");
       res.redirect("back");

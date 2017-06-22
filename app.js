@@ -15,6 +15,7 @@ const getUserGroups = require("./models/getUserGroups");
 const getUsersFromGroup = require("./models/getUsersFromGroup");
 const groupContent = require("./models/groupContent");
 const messageContent = require("./models/messageContent");
+const chat = require("./routes/index.js");
 // rendering ejs
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -43,6 +44,7 @@ app.post("/register", register.submit);
 app.get("/login", login.form);
 app.post("/login", login.submit);
 app.get("/logout", login.logout);
+app.get("/chat", chat.display);
 
 let defaultRoom = "";
 io.on("connection", function(socket) {
