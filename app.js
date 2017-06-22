@@ -82,10 +82,16 @@ io.on("connection", function(socket) {
       });
     });
   });
+
   socket.on("saveNewUser", name => {
-    db.lpush(`${socket.room}:users`, name);
-    db.lpush(name, socket.room);
-    db.lrange(`${socket.room}:users`, 0, -1, (err, users) => {
+    getUsersFromGroup.save(`${socket.room}:users`, name);
+
+    getUserGroups.save(name, socket.room, (err, res) => {
+      if (err) console.log(err);
+      else console.log(res);
+    });
+
+    getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
       if (err) console.log(err);
       else
         //socket.emit("clearUsersDom", users);
@@ -94,22 +100,22 @@ io.on("connection", function(socket) {
   });
 
   socket.on("saveText", data => {
-    db.incr("message:ids", (err, id) => {
+    messageContent.save(socket.room, socket.username, data, (err, content) => {
       if (err) console.log(err);
-      db.hmset(`message:${id}`, "username", socket.username, "data", data);
-      db.rpush(socket.room, JSON.stringify(`message:${id}`));
-      io.in(socket.room).emit("updateChat", socket.room);
+      else console.log(content);
     });
+
+    io.in(socket.room).emit("updateChat", socket.room);
   });
 
   socket.on("renderChatToEveryone", room => {
     socket.emit("clearConversationDom", socket.room);
-    db.lrange(socket.room, 0, -1, (err, roomContent) => {
+    groupContent.get(socket.room, (err, roomContent) => {
       if (err) console.log(err);
       //console.log("content of a room  in an array ", roomContent);
       roomContent.forEach(message => {
         message = message.replace(/\"/g, "");
-        db.hgetall(message, (err, msgObj) => {
+        messageContent.get(message, (err, msgObj) => {
           socket.emit("renderRoomContent", msgObj);
         });
       });
@@ -117,11 +123,28 @@ io.on("connection", function(socket) {
   });
 
   socket.on("addGroup", (groupName, user) => {
-    db.lpush(socket.username, groupName);
-    db.lpush(`${groupName}:users`, user, socket.username);
-    db.lpush(user, groupName);
-    db.lrange(socket.username, 0, -1, (err, roomArr) => {
-      socket.emit("renderRooms", roomArr);
+    getUserGroups.save(socket.username, groupName, (err, content) => {
+      if (err) console.log(err);
+      else console.log(content);
+    });
+
+    getUsersFromGroup.save(
+      `${groupName}:users`,
+      user,
+      socket.username,
+      (err, res) => {
+        if (err) console.log(err);
+        else console.log(res);
+      }
+    );
+    getUserGroups.save(user, groupName, (err, res) => {
+      if (err) console.log(err);
+      else console.log(res);
+    });
+
+    getUserGroups.get(socket.username, (err, roomArr) => {
+      if (err) console.log(err);
+      else socket.emit("renderRooms", roomArr);
     });
   });
 
