@@ -47,7 +47,7 @@ app.get("/chat", chat.display);
 let defaultRoom = "";
 io.on("connection", function(socket) {
   //console.log(io.sockets);
-  console.log(socket.id);
+  //console.log(socket.id);
   socket.on("addUser", name => {
     socket.room = defaultRoom;
     socket.username = name;
