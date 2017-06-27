@@ -9,8 +9,6 @@ const messages = require("./middleware/messages.js");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const login = require("./routes/login");
-const redis = require("redis");
-const db = redis.createClient();
 const getUserGroups = require("./models/getUserGroups");
 const getUsersFromGroup = require("./models/getUsersFromGroup");
 const groupContent = require("./models/groupContent");
@@ -35,9 +33,7 @@ app.use(
 app.use(messages);
 // on get request to '/' render index.ejs
 
-app.get("/", (req, res) => {
-  res.render("login", { title: "Login" });
-});
+app.get("/", login.form);
 
 app.get("/register", register.form);
 app.post("/register", register.submit);
@@ -46,10 +42,12 @@ app.post("/login", login.submit);
 app.get("/logout", login.logout);
 app.get("/chat", chat.display);
 
+// console.log(session);
+
 let defaultRoom = "";
 io.on("connection", function(socket) {
   //console.log(io.sockets);
-  //console.log(socket.id);
+  console.log(socket.id);
   socket.on("addUser", name => {
     socket.room = defaultRoom;
     socket.username = name;

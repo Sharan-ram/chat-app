@@ -4,10 +4,12 @@
   <title>
     <%= title %>
   </title>
+  <link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.4.2/css/bulma.min.css" />
 </head>
 <body>
   <h3>Enter your username and password to login</h3>
   <% include messages %>
+  
   <form action = '/login' method = 'POST'>
     <input type= "text" name = "username" placeholder="username"><br><br>
     <input type = "password" name = "password" placeholder="password"><br><br>
