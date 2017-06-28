@@ -15,6 +15,7 @@ const groupContent = require("./models/groupContent");
 const messageContent = require("./models/messageContent");
 const User = require("./models/user");
 const chat = require("./routes/index.js");
+const GroupAdmins = require("./models/groupAdmins");
 // rendering ejs
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -66,7 +67,15 @@ io.on("connection", function(socket) {
     socket.room = current_room;
     //console.log(socket.room, socket.username);
     socket.emit("clearConversationDom", socket.room);
-    socket.emit("addNewUser", socket.room);
+    GroupAdmins.getAdminByGroupName(current_room, (err, admin) => {
+      if (err) console.log(err);
+      else {
+        if (socket.username === admin) {
+          socket.emit("addNewUser", socket.room);
+        }
+      }
+    });
+
     getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
       //console.log(users);
       //socket.emit("clearUsersDom", users);
@@ -149,6 +158,10 @@ io.on("connection", function(socket) {
           else socket.emit("renderRooms", roomArr);
         });
       } else {
+        GroupAdmins.save(groupName, socket.username, (err, res) => {
+          if (err) console.log(err);
+          else console.log(res);
+        });
         getUserGroups.save(socket.username, groupName, (err, content) => {
           if (err) console.log(err);
           //else console.log(content);
@@ -160,12 +173,12 @@ io.on("connection", function(socket) {
           socket.username,
           (err, res) => {
             if (err) console.log(err);
-            else console.log(res);
+            //else console.log(res);
           }
         );
         getUserGroups.save(user, groupName, (err, res) => {
           if (err) console.log(err);
-          else console.log(res);
+          //else console.log(res);
         });
 
         getUserGroups.get(socket.username, (err, roomArr) => {
