@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
   };
   res.locals.messages = req.session.messages || [];
   res.locals.removeMessage = () => {
-    res.locals.messages = [];
+    req.session.messages = [];
   };
   next();
 };
