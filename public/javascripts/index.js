@@ -1,21 +1,21 @@
 const socket = io();
 const name = document.getElementById("name").innerHTML;
 localStorage.setItem("loggedIn", true);
-
+// /document.getElementById("errorText").innerHTML = "";
 setInterval(() => {
   if (localStorage.length === 0) {
     window.location.replace("/logout");
   }
 }, 5000);
-console.log(localStorage.loggedIn);
+//console.log(localStorage.loggedIn);
 
 const handleLogout = () => {
-  console.log(localStorage);
+  //console.log(localStorage);
   window.localStorage.clear();
   window.location.replace("/logout");
 };
 
-socket.emit("addUser", name);
+socket.emit("onLogin", name);
 
 socket.on("renderRooms", roomArr => {
   document.getElementById("room-div").innerHTML = "";
@@ -102,6 +102,7 @@ let group = document.getElementById("createGroup");
 group.onclick = () => {
   let roomDiv = document.getElementById("room-div");
   roomDiv.innerHTML =
+    "<h4 id = 'errorText'></h4>" +
     "<input type = 'text' name = 'groupName' placeholder = 'Group Name' id = 'groupName'>" +
     "<br/><br/>" +
     "<input type = 'text' name = 'username' placeholder='add user' id = 'admin'>" +
@@ -111,7 +112,7 @@ group.onclick = () => {
 
   createGroupButton.onclick = () => {
     let groupName = document.getElementById("groupName").value;
-    let admin = document.getElementById("admin").value;
-    socket.emit("addGroup", groupName, admin);
+    let user = document.getElementById("admin").value;
+    socket.emit("addGroup", groupName, user);
   };
 };

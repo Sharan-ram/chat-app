@@ -13,6 +13,7 @@ const getUserGroups = require("./models/getUserGroups");
 const getUsersFromGroup = require("./models/getUsersFromGroup");
 const groupContent = require("./models/groupContent");
 const messageContent = require("./models/messageContent");
+const User = require("./models/user");
 const chat = require("./routes/index.js");
 // rendering ejs
 app.set("views", path.join(__dirname, "views"));
@@ -48,7 +49,7 @@ let defaultRoom = "";
 io.on("connection", function(socket) {
   //console.log(io.sockets);
   //console.log(socket.id);
-  socket.on("addUser", name => {
+  socket.on("onLogin", name => {
     socket.room = defaultRoom;
     socket.username = name;
 
@@ -124,28 +125,41 @@ io.on("connection", function(socket) {
   });
 
   socket.on("addGroup", (groupName, user) => {
-    getUserGroups.save(socket.username, groupName, (err, content) => {
-      if (err) console.log(err);
-      else console.log(content);
-    });
+    //console.log(user);
+    User.getByName(user, (err, res) => {
+      //console.log(err);
+      //console.log(res);
+      if (!res.id) {
+        getUserGroups.get(socket.username, (err, roomArr) => {
+          //console.log(roomArr);
+          if (err) console.log(err);
+          else socket.emit("renderRooms", roomArr);
+        });
+      } else {
+        getUserGroups.save(socket.username, groupName, (err, content) => {
+          if (err) console.log(err);
+          //else console.log(content);
+        });
 
-    getUsersFromGroup.save(
-      `${groupName}:users`,
-      user,
-      socket.username,
-      (err, res) => {
-        if (err) console.log(err);
-        else console.log(res);
+        getUsersFromGroup.save(
+          `${groupName}:users`,
+          user,
+          socket.username,
+          (err, res) => {
+            if (err) console.log(err);
+            else console.log(res);
+          }
+        );
+        getUserGroups.save(user, groupName, (err, res) => {
+          if (err) console.log(err);
+          else console.log(res);
+        });
+
+        getUserGroups.get(socket.username, (err, roomArr) => {
+          if (err) console.log(err);
+          else socket.emit("renderRooms", roomArr);
+        });
       }
-    );
-    getUserGroups.save(user, groupName, (err, res) => {
-      if (err) console.log(err);
-      else console.log(res);
-    });
-
-    getUserGroups.get(socket.username, (err, roomArr) => {
-      if (err) console.log(err);
-      else socket.emit("renderRooms", roomArr);
     });
   });
 

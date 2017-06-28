@@ -76,3 +76,8 @@ class User {
 }
 
 module.exports = User;
+/*
+User.getByName("mika", (err, user) => {
+  console.log(user.id);
+});
+*/
