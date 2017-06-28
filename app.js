@@ -86,18 +86,31 @@ io.on("connection", function(socket) {
   });
 
   socket.on("saveNewUser", name => {
-    getUsersFromGroup.save(`${socket.room}:users`, name);
+    User.getByName(name, (err, res) => {
+      //console.log(err);
+      //console.log(res);
+      if (!res.id) {
+        getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
+          if (err) console.log(err);
+          else
+            //socket.emit("clearUsersDom", users);
+            socket.emit("displayUsers", users);
+        });
+      } else {
+        getUsersFromGroup.save(`${socket.room}:users`, name);
 
-    getUserGroups.save(name, socket.room, (err, res) => {
-      if (err) console.log(err);
-      else console.log(res);
-    });
+        getUserGroups.save(name, socket.room, (err, res) => {
+          if (err) console.log(err);
+          else console.log(res);
+        });
 
-    getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
-      if (err) console.log(err);
-      else
-        //socket.emit("clearUsersDom", users);
-        socket.emit("displayUsers", users);
+        getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
+          if (err) console.log(err);
+          else
+            //socket.emit("clearUsersDom", users);
+            socket.emit("displayUsers", users);
+        });
+      }
     });
   });
 
