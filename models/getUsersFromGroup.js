@@ -2,8 +2,8 @@ const redis = require("redis");
 const db = redis.createClient();
 
 class getUsersFromGroup {
-  static save(groupName, adder, added) {
-    db.lpush(groupName, adder, added);
+  static save(groupName, added, adder) {
+    db.lpush(groupName, added, adder);
   }
 
   static get(groupName, cb) {
