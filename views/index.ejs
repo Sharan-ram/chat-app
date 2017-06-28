@@ -7,28 +7,29 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
-  <h4 id = "name"><%= name%></h4>
-  <div id="room-div">
-	   <b>ROOMS</b>
-	</div>
-
-  <form action="/logout" method = "GET">
-    <input type="submit" value="Logout">
-  </form>
-
   <div>
-  	<div id="conversation"></div> <div id = 'users'></div><div id='newUserDiv'></div>
-  </div>
+    <h4 id = "name"><%= name%></h4>
+    <div id="room-div">
+  	   <b>ROOMS</b>
+  	</div>
 
-  <div class = "message">
-    <input id="data" style="width:200px;" />
-    <input type="button" id="datasend" value="send" /><br><br>
-  </div>
 
-  <div id = "addGroup">
-    <a href = "#" id="createGroup">Create Group</a>
-  </div>
+      <button onclick = "handleLogout()">Logout</button>
 
+
+    <div>
+    	<div id="conversation"></div> <div id = 'users'></div><div id='newUserDiv'></div>
+    </div>
+
+    <div class = "message">
+      <input id="data" style="width:200px;" />
+      <input type="button" id="datasend" value="send" /><br><br>
+    </div>
+
+    <div id = "addGroup">
+      <a href = "#" id="createGroup">Create Group</a>
+    </div>
+  </div>
   <script src = "/socket.io/socket.io.js"></script>
   <script src = "/javascripts/index.js"></script>
 

@@ -1,5 +1,20 @@
 const socket = io();
 const name = document.getElementById("name").innerHTML;
+localStorage.setItem("loggedIn", true);
+
+setInterval(() => {
+  if (localStorage.length === 0) {
+    window.location.replace("/logout");
+  }
+}, 5000);
+console.log(localStorage.loggedIn);
+
+const handleLogout = () => {
+  console.log(localStorage);
+  window.localStorage.clear();
+  window.location.replace("/logout");
+};
+
 socket.emit("addUser", name);
 
 socket.on("renderRooms", roomArr => {
