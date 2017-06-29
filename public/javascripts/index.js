@@ -76,11 +76,13 @@ socket.on("clearUsersDom", users => {
 });
 */
 
-socket.on("displayUsers", users => {
+socket.on("displayUsers", (users, admin) => {
   document.getElementById("users").innerHTML = "";
   users.forEach(user => {
     let hnode = document.createElement("h3");
-    hnode.innerHTML = user;
+    admin
+      ? (hnode.innerHTML = user + "<a class = 'delete is-small'></a>")
+      : (hnode.innerHTML = user);
     document.getElementById("users").appendChild(hnode);
   });
 });

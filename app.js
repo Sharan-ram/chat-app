@@ -72,14 +72,19 @@ io.on("connection", function(socket) {
       else {
         if (socket.username === admin) {
           socket.emit("addNewUser", socket.room);
+          getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
+            //console.log(users);
+            //socket.emit("clearUsersDom", users);
+            socket.emit("displayUsers", users, admin);
+          });
+        } else {
+          getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
+            //console.log(users);
+            //socket.emit("clearUsersDom", users);
+            socket.emit("displayUsers", users);
+          });
         }
       }
-    });
-
-    getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
-      //console.log(users);
-      //socket.emit("clearUsersDom", users);
-      socket.emit("displayUsers", users);
     });
 
     groupContent.get(socket.room, (err, roomContent) => {
