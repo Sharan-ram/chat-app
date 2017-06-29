@@ -81,11 +81,19 @@ socket.on("displayUsers", (users, admin) => {
   users.forEach(user => {
     let hnode = document.createElement("h3");
     admin
-      ? (hnode.innerHTML = user + "<a class = 'delete is-small'></a>")
+      ? (hnode.innerHTML =
+          user +
+          "<a class = 'delete is-small' id='cross' onclick = 'crossClicked(\"" +
+          user +
+          "\")'></a>")
       : (hnode.innerHTML = user);
+
     document.getElementById("users").appendChild(hnode);
   });
 });
+const crossClicked = user => {
+  socket.emit("deleteUser", user);
+};
 
 let sendButton = document.getElementById("datasend");
 sendButton.onclick = () => {

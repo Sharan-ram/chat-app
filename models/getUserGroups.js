@@ -18,3 +18,8 @@ getUserGroups.save("mahesh", "t50", (err, res) => {
   else console.log(res);
 });
 */
+/*
+getUserGroups.get("marsh", (err, res) => {
+  console.log(res);
+});
+*/

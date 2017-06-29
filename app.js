@@ -16,6 +16,7 @@ const messageContent = require("./models/messageContent");
 const User = require("./models/user");
 const chat = require("./routes/index.js");
 const GroupAdmins = require("./models/groupAdmins");
+const DeleteUser = require("./models/deleteUser");
 // rendering ejs
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -125,6 +126,19 @@ io.on("connection", function(socket) {
             socket.emit("displayUsers", users);
         });
       }
+    });
+  });
+
+  socket.on("deleteUser", user => {
+    DeleteUser.delete(socket.room, user, (err, res) => {
+      if (err) console.log(err);
+      else console.log(res);
+      getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
+        if (err) console.log(err);
+        else
+          //socket.emit("clearUsersDom", users);
+          socket.emit("displayUsers", users, socket.username);
+      });
     });
   });
 
