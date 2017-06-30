@@ -109,7 +109,7 @@ io.on("connection", function(socket) {
           if (err) console.log(err);
           else
             //socket.emit("clearUsersDom", users);
-            socket.emit("displayUsers", users);
+            socket.emit("displayUsers", users, socket.username);
         });
       } else {
         getUsersFromGroup.save(`${socket.room}:users`, name);
@@ -123,7 +123,7 @@ io.on("connection", function(socket) {
           if (err) console.log(err);
           else
             //socket.emit("clearUsersDom", users);
-            socket.emit("displayUsers", users);
+            socket.emit("displayUsers", users, socket.username);
         });
       }
     });
