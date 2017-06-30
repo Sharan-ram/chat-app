@@ -75,7 +75,9 @@ socket.on("clearUsersDom", users => {
   document.getElementById("users").innerHTML = "";
 });
 */
-
+socket.on("clearNewUserText", room => {
+  document.getElementById("newUserDiv").innerHTML = "";
+});
 socket.on("displayUsers", (users, admin) => {
   document.getElementById("users").innerHTML = "";
   users.forEach(user => {

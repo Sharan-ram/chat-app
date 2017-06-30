@@ -82,6 +82,7 @@ io.on("connection", function(socket) {
           getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
             //console.log(users);
             //socket.emit("clearUsersDom", users);
+            socket.emit("clearNewUserText", socket.room);
             socket.emit("displayUsers", users);
           });
         }
