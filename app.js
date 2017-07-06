@@ -194,7 +194,30 @@ const deleteUser = socket => {
   });
 };
 
-const addNewUser = socket => {};
+const addNewUser = socket => {
+  socket.on("addNewUserToGroup", user => {
+    User.getByName(user, (err, userDetails) => {
+      if (userDetails.id) {
+        getUsersFromGroup.get(`${socket.room}:users`, (err, usersArr) => {
+          if (usersArr.indexOf(user) === -1) {
+            getUsersFromGroup.save(`${socket.room}:users`, user);
+            getUserGroups.save(user, socket.room, (err, res) => {
+              if (err) console.log("error saving new user :" + err);
+            });
+            getUsersFromGroup.get(`${socket.room}:users`, (err, userArr) => {
+              GroupAdmins.getAdminByGroupName(
+                `${socket.room}`,
+                (err, admin) => {
+                  socket.emit("adminsView", socket.room, admin, userArr);
+                }
+              );
+            });
+          }
+        });
+      }
+    });
+  });
+};
 
 http.listen(port, () => {
   console.log("listening on port :", port);

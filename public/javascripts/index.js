@@ -70,12 +70,12 @@ const viewForAdmin = (groupName, admin, usersArr) => {
         `</b>` +
         `<a class = "delete is-small" onclick = "crossClicked(\`` +
         user +
-        `\`)"></a>`;
+        `\`)"></a><br/>`;
     } else {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
     }
   });
-  addUserButtonDivForAdmin.innerHTML = `<a class = "button is-primary" id="addUserButtonForAdmin">Add User</a>`;
+  addUserButtonDivForAdmin.innerHTML = `<a class = "button is-primary" id="addUserButtonForAdmin" onclick = "addUserButtonClicked()">Add User</a>`;
 };
 
 const viewForUser = (groupName, admin, usersArr) => {
@@ -86,7 +86,7 @@ const viewForUser = (groupName, admin, usersArr) => {
   userContent.className += " displayTrue";
   usersArr.forEach(user => {
     if (user !== admin) {
-      userContent.innerHTML += `<b>` + user + `</b>`;
+      userContent.innerHTML += `<b>` + user + `</b><br/>`;
     } else {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
     }
@@ -97,7 +97,17 @@ const crossClicked = user => {
 };
 
 const addUserButtonClicked = () => {
-  socket.emit("checkForAdminClick");
+  let userContent = document.getElementById("userContent");
+  userContent.innerHTML = `
+    <input class = "input" type = "text" id = "userToBeAdded" placeholder = "enter username..">
+      <a class = "button -is-primary" id = "addButton" onclick = "addButtonClicked()">Add</a>
+  `;
+};
+
+const addButtonClicked = () => {
+  let userToBeAddedDom = document.getElementById("userToBeAdded");
+  userToBeAdded = userToBeAddedDom.value;
+  socket.emit("addNewUserToGroup", userToBeAdded);
 };
 
 const toggleModal = () => {
