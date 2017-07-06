@@ -62,6 +62,7 @@ io.on("connection", socket => {
   createGroup(socket);
   fetchUsersFromGroup(socket);
   deleteUser(socket);
+  addNewUser(socket);
   //disconnect(socket);
 });
 
@@ -183,9 +184,17 @@ const normalUsersView = (socket, groupName, admin, usersArr) => {
 
 const deleteUser = socket => {
   socket.on("deleteUserFromGroup", user => {
-    console.log(user, socket.room);
+    getUsersFromGroup.delete(`${socket.room}:users`, user);
+    getUserGroups.delete(user, socket.room);
+    getUsersFromGroup.get(`${socket.room}:users`, (err, userArr) => {
+      GroupAdmins.getAdminByGroupName(`${socket.room}`, (err, admin) => {
+        socket.emit("adminsView", socket.room, admin, userArr);
+      });
+    });
   });
 };
+
+const addNewUser = socket => {};
 
 http.listen(port, () => {
   console.log("listening on port :", port);

@@ -91,6 +91,8 @@ const crossClicked = user => {
   socket.emit("deleteUserFromGroup", user);
 };
 
+const addUserButtonClicked = () => {};
+
 const toggleModal = () => {
   document.getElementById("modal").classList.remove("is-active");
 };
