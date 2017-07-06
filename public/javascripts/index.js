@@ -44,10 +44,29 @@ const getClickedGroupName = () => {
   socket.emit("getUsersInGroup", groupName);
 };
 
-socket.on("adminsView", (groupName, admin, usersArr) => {});
+socket.on("adminsView", (groupName, admin, usersArr) => {
+  document.getElementById("modal").className += " is-active";
+  let userContent = document.getElementById("userContent");
+
+  userContent.innerHTML = "";
+  userContent.classList.remove("displayFalse");
+  userContent.className += " displayTrue";
+
+  usersArr.forEach(user => {
+    if (user !== admin) {
+      userContent.innerHTML +=
+        `<b>` + user + `</b>` + `<a class = "delete is-small"></a>`;
+    } else {
+      userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
+    }
+  });
+});
 
 socket.on("usersView", (groupName, admin, usersArr) => {});
 
+const toggleModal = () => {
+  document.getElementById("modal").classList.remove("is-active");
+};
 /*socket.on("addNewUser", room => {
   let newUserDiv = document.getElementById("newUserDiv");
   newUserDiv.innerHTML = "";
@@ -155,4 +174,3 @@ group.onclick = () => {
     socket.emit("addGroup", groupName, user);
   };
 };
-
