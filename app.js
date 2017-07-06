@@ -61,6 +61,7 @@ io.on("connection", socket => {
   saveUserChat(socket);
   createGroup(socket);
   fetchUsersFromGroup(socket);
+  deleteUser(socket);
   //disconnect(socket);
 });
 
@@ -180,7 +181,12 @@ const normalUsersView = (socket, groupName, admin, usersArr) => {
   socket.emit("usersView", groupName, admin, usersArr);
 };
 
+const deleteUser = socket => {
+  socket.on("deleteUserFromGroup", user => {
+    console.log(user, socket.room);
+  });
+};
+
 http.listen(port, () => {
   console.log("listening on port :", port);
 });
-

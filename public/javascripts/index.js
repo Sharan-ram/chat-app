@@ -45,50 +45,55 @@ const getClickedGroupName = () => {
 };
 
 socket.on("adminsView", (groupName, admin, usersArr) => {
+  viewForAdmin(groupName, admin, usersArr);
+});
+
+socket.on("usersView", (groupName, admin, usersArr) => {
+  viewForUser(groupName, admin, usersArr);
+});
+
+const viewForAdmin = (groupName, admin, usersArr) => {
   document.getElementById("modal").className += " is-active";
   let userContent = document.getElementById("userContent");
-
   userContent.innerHTML = "";
   userContent.classList.remove("displayFalse");
   userContent.className += " displayTrue";
-
   usersArr.forEach(user => {
     if (user !== admin) {
       userContent.innerHTML +=
-        `<b>` + user + `</b>` + `<a class = "delete is-small"></a>`;
+        `<b>` +
+        user +
+        `</b>` +
+        `<a class = "delete is-small" onclick = "crossClicked(\`` +
+        user +
+        `\`)"></a>`;
     } else {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
     }
   });
-});
+};
 
-socket.on("usersView", (groupName, admin, usersArr) => {});
+const viewForUser = (groupName, admin, usersArr) => {
+  document.getElementById("modal").className += " is-active";
+  let userContent = document.getElementById("userContent");
+  userContent.innerHTML = "";
+  userContent.classList.remove("displayFalse");
+  userContent.className += " displayTrue";
+  usersArr.forEach(user => {
+    if (user !== admin) {
+      userContent.innerHTML += `<b>` + user + `</b>`;
+    } else {
+      userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
+    }
+  });
+};
+const crossClicked = user => {
+  socket.emit("deleteUserFromGroup", user);
+};
 
 const toggleModal = () => {
   document.getElementById("modal").classList.remove("is-active");
 };
-/*socket.on("addNewUser", room => {
-  let newUserDiv = document.getElementById("newUserDiv");
-  newUserDiv.innerHTML = "";
-  let anode = document.createElement("a");
-  anode.setAttribute("href", "#");
-  anode.innerHTML = "Add new user";
-  newUserDiv.appendChild(anode);
-
-  anode.onclick = () => {
-    let usersDiv = document.getElementById("users");
-    usersDiv.innerHTML =
-      "<input type = 'text' name = 'newUserName' id='newUserId' placeholder = 'add new user'>" +
-      "<br/><br/>" +
-      "<input type = 'button' id = 'AddUserButton' value = 'Add user' >";
-    let addUserButton = document.getElementById("AddUserButton");
-    addUserButton.onclick = () => {
-      let newUserName = document.getElementById("newUserId").value;
-      socket.emit("saveNewUser", newUserName);
-    };
-  };
-});
-*/
 
 socket.on("renderRoomContent", obj => {
   //document.getElementById("conversation").innerHTML = "";
@@ -110,33 +115,6 @@ socket.on("clearConversationDom", current_room => {
   document.getElementById("getGroupName").innerHTML = current_room;
 });
 
-/*
-socket.on("clearUsersDom", users => {
-  document.getElementById("users").innerHTML = "";
-});
-*/
-/*socket.on("clearNewUserText", room => {
-  document.getElementById("newUserDiv").innerHTML = "";
-});
-socket.on("displayUsers", (users, admin) => {
-  document.getElementById("users").innerHTML = "";
-  users.forEach(user => {
-    let hnode = document.createElement("h3");
-    admin
-      ? (hnode.innerHTML =
-          user +
-          "<a class = 'delete is-small' id='cross' onclick = 'crossClicked(\"" +
-          user +
-          "\")'></a>")
-      : (hnode.innerHTML = user);
-
-    document.getElementById("users").appendChild(hnode);
-  });
-});
-const crossClicked = user => {
-  socket.emit("deleteUser", user);
-};
-*/
 let sendButton = document.getElementById("send");
 sendButton.onclick = () => {
   let dataElement = document.getElementById("data");
@@ -146,10 +124,6 @@ sendButton.onclick = () => {
   socket.emit("saveText", data);
 };
 
-/*socket.on("updateChat", room => {
-  socket.emit("renderChatToEveryone", room);
-});
-*/
 let group = document.getElementById("createGroup");
 group.onclick = () => {
   let roomDiv = document.getElementById("room-div");
