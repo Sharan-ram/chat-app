@@ -53,6 +53,10 @@ socket.on("usersView", (groupName, admin, usersArr) => {
 });
 
 const viewForAdmin = (groupName, admin, usersArr) => {
+  let addUserButtonDivForAdmin = document.getElementById(
+    "addUserButtonDivForAdmin"
+  );
+  addUserButtonDivForAdmin.innerHTML = "";
   document.getElementById("modal").className += " is-active";
   let userContent = document.getElementById("userContent");
   userContent.innerHTML = "";
@@ -71,6 +75,7 @@ const viewForAdmin = (groupName, admin, usersArr) => {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
     }
   });
+  addUserButtonDivForAdmin.innerHTML = `<a class = "button is-primary" id="addUserButtonForAdmin">Add User</a>`;
 };
 
 const viewForUser = (groupName, admin, usersArr) => {
@@ -91,7 +96,9 @@ const crossClicked = user => {
   socket.emit("deleteUserFromGroup", user);
 };
 
-const addUserButtonClicked = () => {};
+const addUserButtonClicked = () => {
+  socket.emit("checkForAdminClick");
+};
 
 const toggleModal = () => {
   document.getElementById("modal").classList.remove("is-active");
