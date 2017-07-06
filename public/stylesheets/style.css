@@ -1,53 +1,97 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
+.parent {
+  height:100vh;
+  display:flex;
 
-#room-div {
-  float:left;
-  width:200px;
-  border-right:1px solid black;
-  height:500px;
-  padding:10px;
-  overflow:hidden;
-  background-color: #F2F3F5;
+}
+
+#side-panel {
+  flex:1;
+  margin-right:4px;
 }
 
 #conversation {
-  margin:10px;
-  float:left;
-  width:300px;
-  height:500px;
-  overflow:scroll;
-
-}
-#users {
-  width:200px;
-  border-left:1px solid black;
-  height:500px;
-  padding:10px;
-  overflow:hidden;
-  background-color: #F2F3F5;
+  flex:3;
+  background-color: white;
+  overflow:auto;
+  width:100%;
 }
 
-a {
-  text-decoration:none;
-  color:#536493;
-}
-.username {
-  color:#F30C0F
+#menu-bar {
+  height:6%;
+  background-color: #b6b6b4;
+  display:flex;
+  flex-wrap:wrap;
 }
 
-#datasend {
-  background-color: #DDE3F3;
-  width:50px;
+.name {
+  flex:1;
+}
+.addGroup {
+  flex:1;
+}
+.logout {
+  flex:1;
+}
 
+#groupNameDiv {
+  width:100%;
+  height:6%;
+  background-color: #f0ffff;
+  margin-bottom: 15px;
+}
+.groupName {
+  display:block;
+  width:100%;
+}
+
+.typeSpace {
+  width:85%;
+  position:fixed;
+  bottom:0;
+  height:10%;
+  background-color: #f5f5dc;
+  display:flex;
+}
+#send {
+  color:black;
+  cursor:pointer;
+}
+.textSpace {
+  flex: 5;
+}
+.sendSpace {
+  margin-left:5px;
+  flex:1;
+}
+#room-div {
+  overflow:auto;
+  margin-top:10px;
 }
 #rooms {
-  height:100%
+  margin-bottom:5px;
 }
-.message {
-  clear:left
+#textMessages {
+  height:550px;
+  background-color: #fcdfff;
+  overflow:auto;
 }
-.container {
-    
-  margin:auto;
+.username {
+  color:#3d3c3a;
 }
+
+#texts {
+  min-width:50%;
+  display:block;
+  background-color: white;
+  margin:30px;
+  padding:5px;
+}
+
+.displayFalse {
+  display:none;
+}
+

@@ -2,11 +2,15 @@ const express = require("express");
 const app = express();
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
-const port = 3000;
+const port = 5555;
 const path = require("path");
 const register = require("./routes/register.js");
 const messages = require("./middleware/messages.js");
-const session = require("express-session");
+const session = require("express-session")({
+  secret: "my-secret",
+  resave: true,
+  saveUninitialized: true
+});
 const bodyParser = require("body-parser");
 const login = require("./routes/login");
 const getUserGroups = require("./models/getUserGroups");
@@ -17,6 +21,8 @@ const User = require("./models/user");
 const chat = require("./routes/index.js");
 const GroupAdmins = require("./models/groupAdmins");
 const DeleteUser = require("./models/deleteUser");
+const cookieParser = require("cookie-parser");
+const sharedsession = require("express-socket.io-session");
 // rendering ejs
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -25,11 +31,11 @@ app.set("view engine", "ejs");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
-app.use(
-  session({
-    secret: "secret",
-    resave: false,
-    saveUninitialized: true
+app.use(cookieParser());
+app.use(session);
+io.use(
+  sharedsession(session, {
+    autoSave: true
   })
 );
 //app.use(user);
@@ -45,175 +51,136 @@ app.post("/login", login.submit);
 app.get("/logout", login.logout);
 app.get("/chat", chat.display);
 
-// console.log(session);
-
 let defaultRoom = "";
-io.on("connection", function(socket) {
-  //console.log(io.sockets);
-  //console.log(socket.id);
-  socket.on("onLogin", name => {
-    socket.room = defaultRoom;
-    socket.username = name;
+let username = "";
+io.on("connection", socket => {
+  getUsername(socket);
+  setDefaultRoom(socket);
+  getGroups(socket);
+  switchUserGroup(socket);
+  saveUserChat(socket);
+  createGroup(socket);
+  fetchUsersFromGroup(socket);
+  //disconnect(socket);
+});
 
-    getUserGroups.get(socket.username, (err, roomArr) => {
-      //console.log(roomArr);
-      if (err) console.log(err);
-      else socket.emit("renderRooms", roomArr);
-    });
+const getUsername = socket => {
+  username = socket.handshake.session.name;
+  socket.username = username;
+};
+
+const setDefaultRoom = socket => {
+  socket.room = defaultRoom;
+};
+
+const getGroups = socket => {
+  //console.log(socket.username);
+  getUserGroups.get(socket.username, (err, groupArr) => {
+    if (err) console.log(err);
+    else {
+      //console.log(groupArr);
+      socket.emit("renderRooms", groupArr);
+    }
   });
+};
 
-  socket.on("loadRoomContent", current_room => {
+const switchUserGroup = socket => {
+  socket.on("loadRoomContent", group => {
     socket.leave(socket.room);
-    socket.join(current_room);
-    socket.room = current_room;
-    //console.log(socket.room, socket.username);
-    socket.emit("clearConversationDom", socket.room);
-    GroupAdmins.getAdminByGroupName(current_room, (err, admin) => {
+    socket.join(group);
+    socket.room = group;
+    groupContent.get(group, (err, content) => {
       if (err) console.log(err);
       else {
-        if (socket.username === admin) {
-          socket.emit("addNewUser", socket.room);
-          getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
-            //console.log(users);
-            //socket.emit("clearUsersDom", users);
-            socket.emit("displayUsers", users, admin);
+        socket.emit("clearConversationDom", socket.room);
+        content.forEach(obj => {
+          obj = obj.replace(/\"/g, "");
+          messageContent.get(obj, (err, messageData) => {
+            if (err) console.log("err retrieving conversation :" + err);
+            else socket.emit("renderRoomContent", messageData);
           });
-        } else {
-          getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
-            //console.log(users);
-            //socket.emit("clearUsersDom", users);
-            socket.emit("clearNewUserText", socket.room);
-            socket.emit("displayUsers", users);
-          });
-        }
-      }
-    });
-
-    groupContent.get(socket.room, (err, roomContent) => {
-      if (err) console.log(err);
-      //console.log("content of a room  in an array ", roomContent);
-      roomContent.forEach(message => {
-        message = message.replace(/\"/g, "");
-        messageContent.get(message, (err, msgObj) => {
-          socket.emit("renderRoomContent", msgObj);
-        });
-      });
-    });
-  });
-
-  socket.on("saveNewUser", name => {
-    User.getByName(name, (err, res) => {
-      //console.log(err);
-      //console.log(res);
-      if (!res.id) {
-        getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
-          if (err) console.log(err);
-          else
-            //socket.emit("clearUsersDom", users);
-            socket.emit("displayUsers", users, socket.username);
-        });
-      } else {
-        getUsersFromGroup.save(`${socket.room}:users`, name);
-
-        getUserGroups.save(name, socket.room, (err, res) => {
-          if (err) console.log(err);
-          else console.log(res);
-        });
-
-        getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
-          if (err) console.log(err);
-          else
-            //socket.emit("clearUsersDom", users);
-            socket.emit("displayUsers", users, socket.username);
         });
       }
     });
   });
+};
 
-  socket.on("deleteUser", user => {
-    DeleteUser.delete(socket.room, user, (err, res) => {
-      if (err) console.log(err);
-      else console.log(res);
-      getUsersFromGroup.get(`${socket.room}:users`, (err, users) => {
-        if (err) console.log(err);
-        else
-          //socket.emit("clearUsersDom", users);
-          socket.emit("displayUsers", users, socket.username);
-      });
-    });
-  });
-
+const saveUserChat = socket => {
   socket.on("saveText", data => {
-    messageContent.save(socket.room, socket.username, data, (err, content) => {
-      if (err) console.log(err);
-      else console.log(content);
+    io.in(socket.room).emit("renderRoomContent", {
+      username: socket.username,
+      data: data
     });
-
-    io.in(socket.room).emit("updateChat", socket.room);
-  });
-
-  socket.on("renderChatToEveryone", room => {
-    socket.emit("clearConversationDom", socket.room);
-    groupContent.get(socket.room, (err, roomContent) => {
-      if (err) console.log(err);
-      //console.log("content of a room  in an array ", roomContent);
-      roomContent.forEach(message => {
-        message = message.replace(/\"/g, "");
-        messageContent.get(message, (err, msgObj) => {
-          socket.emit("renderRoomContent", msgObj);
-        });
-      });
+    messageContent.save(socket.room, socket.username, data, (err, res) => {
+      if (err) console.log("error saving user text :" + err);
     });
   });
+};
 
+const createGroup = socket => {
   socket.on("addGroup", (groupName, user) => {
-    //console.log(user);
-    User.getByName(user, (err, res) => {
-      //console.log(err);
-      //console.log(res);
-      if (!res.id) {
-        getUserGroups.get(socket.username, (err, roomArr) => {
-          //console.log(roomArr);
-          if (err) console.log(err);
-          else socket.emit("renderRooms", roomArr);
+    checkIfUserValid(user, res => {
+      if (res === true) {
+        GroupAdmins.save(groupName, socket.username, (err, res) => {
+          if (err) console.log("error creating group :" + err);
+          else {
+            getUserGroups.save(socket.username, groupName, (err, res) => {
+              if (err) console.log("err saving room to adder");
+            });
+            getUserGroups.save(user, groupName, (err, res) => {
+              if (err) console.log("err saving room to added");
+              displayRoomsAfterAdding(socket, groupName, user);
+            });
+            getUsersFromGroup.save(`${groupName}:users`, user, socket.username);
+          }
         });
       } else {
-        GroupAdmins.save(groupName, socket.username, (err, res) => {
-          if (err) console.log(err);
-          else console.log(res);
-        });
-        getUserGroups.save(socket.username, groupName, (err, content) => {
-          if (err) console.log(err);
-          //else console.log(content);
-        });
+        getGroups(socket);
+      }
+    });
+  });
+};
 
-        getUsersFromGroup.save(
-          `${groupName}:users`,
-          user,
-          socket.username,
-          (err, res) => {
-            if (err) console.log(err);
-            //else console.log(res);
+const checkIfUserValid = (user, cb) => {
+  User.getByName(user, (err, userDetails) => {
+    if (!userDetails.id) {
+      cb(false);
+    } else cb(true);
+  });
+};
+
+const displayRoomsAfterAdding = socket => {
+  getGroups(socket);
+};
+
+const fetchUsersFromGroup = socket => {
+  socket.on("getUsersInGroup", groupName => {
+    GroupAdmins.getAdminByGroupName(groupName, (err, admin) => {
+      if (err) console.log("error retrieving the admin :" + err);
+      else {
+        let adminOfGroup = admin;
+        getUsersFromGroup.get(`${groupName}:users`, (err, usersArr) => {
+          if (err) console.log("error retrieving users from a group:" + err);
+          else {
+            if (socket.username === adminOfGroup) {
+              adminViewOfUsers(socket, groupName, adminOfGroup, usersArr);
+            } else normalUsersView(socket, groupName, adminOfGroup, usersArr);
           }
-        );
-        getUserGroups.save(user, groupName, (err, res) => {
-          if (err) console.log(err);
-          //else console.log(res);
-        });
-
-        getUserGroups.get(socket.username, (err, roomArr) => {
-          if (err) console.log(err);
-          else socket.emit("renderRooms", roomArr);
         });
       }
     });
   });
+};
 
-  socket.on("disconnect", function() {
-    socket.leave(socket.room);
-  });
-});
+const adminViewOfUsers = (socket, groupName, admin, usersArr) => {
+  socket.emit("adminsView", groupName, admin, usersArr);
+};
+
+const normalUsersView = (socket, groupName, admin, usersArr) => {
+  socket.emit("usersView", groupName, admin, usersArr);
+};
 
 http.listen(port, () => {
   console.log("listening on port :", port);
 });
+

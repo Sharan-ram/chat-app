@@ -7,23 +7,37 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
-  <div>
-    <h4 id = "name"><%= name%></h4>
-    <div id="room-div">
-  	   <b>ROOMS</b>
-  	</div>
-    <button onclick = "handleLogout()">Logout</button>
-    <div>
-    	<div id="conversation"></div> <div id = 'users'></div><div id='newUserDiv'></div>
+  <div class = "parent">
+    <div id = "side-panel">
+      <div id = "menu-bar">
+        <a class = "button is-primary name" id="name"><%= name %></a>
+        <a class = "button is-primary addGroup" id="createGroup">addgroup</a>
+        <a class = "button is-primary logout" onclick="handleLogout()">logout</a>
+      </div>
+      <div id = "room-div"></div>
     </div>
 
-    <div class = "message">
-      <input id="data" style="width:200px;" />
-      <input type="button" id="datasend" value="send" /><br><br>
-    </div>
+    <div id = "conversation">
+      <div id = "groupNameDiv">
+        <a class = "button groupName is-light is-focussed" id = "displayGroupName" onclick = "getClickedGroupName()"><b class = "alignGroupName" id = "getGroupName">groupName</b></a>
+      </div>
+      <div id = "textMessages"></div>
 
-    <div id = "addGroup">
-      <a href = "#" id="createGroup">Create Group</a>
+      <div class = "field typeSpace">
+        <div class = "textSpace">
+          <p class = "control">
+            <input class = "input is-medium" id = "data" type = "text" placeholder = "Type a message...">
+          </p>
+        </div>
+        <div class = "sendSpace">
+          <p class = "control">
+            <span class = "icon is-medium is-right" id = "send">
+              <i class="fa fa-paper-plane" aria-hidden="true"></i>
+            </span>
+          </p>
+        </div>
+      </div>
+
     </div>
   </div>
   <script src = "/socket.io/socket.io.js"></script>
@@ -31,3 +45,4 @@
 
 </body>
 </html>
+
