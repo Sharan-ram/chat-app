@@ -99,12 +99,17 @@ const viewForUser = (groupName, admin, usersArr) => {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
     }
   });
-  exitGroupButtonDiv.innerHTML = `<a class = "button is-danger" id="exitGroupButton" onclick = "exitGroupButtonClicked()">Exit group</a>`;
+  exitGroupButtonDiv.innerHTML =
+    `<a class = "button is-danger" id="exitGroupButton" onclick = "exitGroupButtonClicked(\`` +
+    groupName +
+    `\`)">Exit group</a>`;
 };
 
 const deleteGroupButtonClicked = () => {};
 
-const exitGroupButtonClicked = () => {};
+const exitGroupButtonClicked = groupName => {
+  socket.emit("exitGroup", groupName);
+};
 
 const crossClicked = user => {
   socket.emit("deleteUserFromGroup", user);

@@ -63,6 +63,7 @@ io.on("connection", socket => {
   fetchUsersFromGroup(socket);
   deleteUser(socket);
   addNewUser(socket);
+  exitFromGroup(socket);
   //disconnect(socket);
 });
 
@@ -216,6 +217,28 @@ const addNewUser = socket => {
         });
       }
     });
+  });
+};
+
+const exitFromGroup = socket => {
+  socket.on("exitGroup", groupName => {
+    checkIfAdminExited(socket, groupName, res => {
+      if (!res) {
+        getUserGroups.delete(socket.username, groupName);
+        getUsersFromGroup.delete(`${groupName}:users`, socket.username);
+        getGroups(socket);
+      }
+    });
+  });
+};
+
+const checkIfAdminExited = (socket, groupName, cb) => {
+  GroupAdmins.getAdminByGroupName(groupName, (err, admin) => {
+    if (err) console.log("err retrieving admin :" + err);
+    else {
+      if (socket.username === admin) cb(true);
+      else cb(false);
+    }
   });
 };
 
