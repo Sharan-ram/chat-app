@@ -64,6 +64,7 @@ io.on("connection", socket => {
   deleteUser(socket);
   addNewUser(socket);
   exitFromGroup(socket);
+  deleteGroup(socket);
   //disconnect(socket);
 });
 
@@ -227,6 +228,8 @@ const exitFromGroup = socket => {
         getUserGroups.delete(socket.username, groupName);
         getUsersFromGroup.delete(`${groupName}:users`, socket.username);
         getGroups(socket);
+      } else {
+        console.log(socket.username + " is the admin");
       }
     });
   });
@@ -239,6 +242,20 @@ const checkIfAdminExited = (socket, groupName, cb) => {
       if (socket.username === admin) cb(true);
       else cb(false);
     }
+  });
+};
+
+const deleteGroup = socket => {
+  socket.on("deleteGroupByAdmin", groupName => {
+    getUsersFromGroup.get(`${groupName}:users`, (err, usersArr) => {
+      if (err) console.log("err retrieving users from group :" + err);
+      else {
+        usersArr.forEach(user => {
+          getUserGroups.delete(user, groupName);
+        });
+        getGroups(socket);
+      }
+    });
   });
 };
 

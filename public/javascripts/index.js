@@ -80,7 +80,10 @@ const viewForAdmin = (groupName, admin, usersArr) => {
     }
   });
   exitGroupButtonDiv.innerHTML = `<a class = "button is-dark" id="exitGroupButton" onclick = "exitGroupButtonClicked()">Exit group</a>`;
-  deleteGroupButtonDiv.innerHTML = `<a class = "button is-danger" id="deleteGroupButton" onclick = "deleteGroupButtonClicked()">Delete Group</a>`;
+  deleteGroupButtonDiv.innerHTML =
+    `<a class = "button is-danger" id="deleteGroupButton" onclick = "deleteGroupButtonClicked(\`` +
+    groupName +
+    `\`)">Delete Group</a>`;
   addUserButtonDivForAdmin.innerHTML = `<a class = "button is-primary" id="addUserButtonForAdmin" onclick = "addUserButtonClicked()">Add User</a>`;
 };
 
@@ -105,7 +108,9 @@ const viewForUser = (groupName, admin, usersArr) => {
     `\`)">Exit group</a>`;
 };
 
-const deleteGroupButtonClicked = () => {};
+const deleteGroupButtonClicked = groupName => {
+  socket.emit("deleteGroupByAdmin", groupName);
+};
 
 const exitGroupButtonClicked = groupName => {
   socket.emit("exitGroup", groupName);
