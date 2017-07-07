@@ -53,6 +53,10 @@ socket.on("usersView", (groupName, admin, usersArr) => {
 });
 
 const viewForAdmin = (groupName, admin, usersArr) => {
+  let deleteGroupButtonDiv = document.getElementById("delete");
+  deleteGroupButtonDiv.innerHTML = "";
+  let exitGroupButtonDiv = document.getElementById("exit");
+  exitGroupButtonDiv.innerHTML = "";
   let addUserButtonDivForAdmin = document.getElementById(
     "addUserButtonDivForAdmin"
   );
@@ -75,10 +79,14 @@ const viewForAdmin = (groupName, admin, usersArr) => {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
     }
   });
+  exitGroupButtonDiv.innerHTML = `<a class = "button is-dark" id="exitGroupButton" onclick = "exitGroupButtonClicked()">Exit group</a>`;
+  deleteGroupButtonDiv.innerHTML = `<a class = "button is-danger" id="deleteGroupButton" onclick = "deleteGroupButtonClicked()">Delete Group</a>`;
   addUserButtonDivForAdmin.innerHTML = `<a class = "button is-primary" id="addUserButtonForAdmin" onclick = "addUserButtonClicked()">Add User</a>`;
 };
 
 const viewForUser = (groupName, admin, usersArr) => {
+  let exitGroupButtonDiv = document.getElementById("exit");
+  exitGroupButtonDiv.innerHTML = "";
   document.getElementById("modal").className += " is-active";
   let userContent = document.getElementById("userContent");
   userContent.innerHTML = "";
@@ -91,7 +99,13 @@ const viewForUser = (groupName, admin, usersArr) => {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
     }
   });
+  exitGroupButtonDiv.innerHTML = `<a class = "button is-danger" id="exitGroupButton" onclick = "exitGroupButtonClicked()">Exit group</a>`;
 };
+
+const deleteGroupButtonClicked = () => {};
+
+const exitGroupButtonClicked = () => {};
+
 const crossClicked = user => {
   socket.emit("deleteUserFromGroup", user);
 };
