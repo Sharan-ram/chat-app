@@ -1,3 +1,10 @@
+let deleteGroupButtonDiv = document.getElementById("delete");
+let addUserButtonDivForAdmin = document.getElementById(
+  "addUserButtonDivForAdmin"
+);
+let exitGroupButtonDiv = document.getElementById("exit");
+let userContent = document.getElementById("userContent");
+
 const socket = io();
 
 localStorage.setItem("loggedIn", true);
@@ -53,16 +60,10 @@ socket.on("usersView", (groupName, admin, usersArr) => {
 });
 
 const viewForAdmin = (groupName, admin, usersArr) => {
-  let deleteGroupButtonDiv = document.getElementById("delete");
   deleteGroupButtonDiv.innerHTML = "";
-  let exitGroupButtonDiv = document.getElementById("exit");
   exitGroupButtonDiv.innerHTML = "";
-  let addUserButtonDivForAdmin = document.getElementById(
-    "addUserButtonDivForAdmin"
-  );
   addUserButtonDivForAdmin.innerHTML = "";
   document.getElementById("modal").className += " is-active";
-  let userContent = document.getElementById("userContent");
   userContent.innerHTML = "";
   userContent.classList.remove("displayFalse");
   userContent.className += " displayTrue";
@@ -88,16 +89,10 @@ const viewForAdmin = (groupName, admin, usersArr) => {
 };
 
 const viewForUser = (groupName, admin, usersArr) => {
-  let addUserButtonDivForAdmin = document.getElementById(
-    "addUserButtonDivForAdmin"
-  );
   addUserButtonDivForAdmin.innerHTML = "";
-  let deleteGroupButtonDiv = document.getElementById("delete");
   deleteGroupButtonDiv.innerHTML = "";
-  let exitGroupButtonDiv = document.getElementById("exit");
   exitGroupButtonDiv.innerHTML = "";
   document.getElementById("modal").className += " is-active";
-  let userContent = document.getElementById("userContent");
   userContent.innerHTML = "";
   userContent.classList.remove("displayFalse");
   userContent.className += " displayTrue";
@@ -127,7 +122,6 @@ const crossClicked = user => {
 };
 
 const addUserButtonClicked = () => {
-  let userContent = document.getElementById("userContent");
   userContent.innerHTML = `
     <input class = "input" type = "text" id = "userToBeAdded" placeholder = "enter username..">
       <a class = "button -is-primary" id = "addButton" onclick = "addButtonClicked()">Add</a>
