@@ -88,6 +88,12 @@ const viewForAdmin = (groupName, admin, usersArr) => {
 };
 
 const viewForUser = (groupName, admin, usersArr) => {
+  let addUserButtonDivForAdmin = document.getElementById(
+    "addUserButtonDivForAdmin"
+  );
+  addUserButtonDivForAdmin.innerHTML = "";
+  let deleteGroupButtonDiv = document.getElementById("delete");
+  deleteGroupButtonDiv.innerHTML = "";
   let exitGroupButtonDiv = document.getElementById("exit");
   exitGroupButtonDiv.innerHTML = "";
   document.getElementById("modal").className += " is-active";
