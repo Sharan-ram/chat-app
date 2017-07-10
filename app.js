@@ -264,6 +264,17 @@ const addNewUser = socket => {
                 }
               );
             });
+            getSocketDetailByUsername(user, socketObj => {
+              if (socketObj) {
+                getUserGroups.get(user, (err, groupArr) => {
+                  if (err) console.log(err);
+                  else {
+                    //console.log(groupArr);
+                    socketObj.socket.emit("renderRooms", groupArr);
+                  }
+                });
+              }
+            });
           }
         });
       }
