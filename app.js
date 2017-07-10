@@ -138,13 +138,15 @@ const switchUserGroup = socket => {
 
 const saveUserChat = socket => {
   socket.on("saveText", data => {
-    io.in(socket.room).emit("renderRoomContent", {
-      username: socket.username,
-      data: data
-    });
-    messageContent.save(socket.room, socket.username, data, (err, res) => {
-      if (err) console.log("error saving user text :" + err);
-    });
+    if (data !== "" && (socket.room && socket.room !== "")) {
+      io.in(socket.room).emit("renderRoomContent", {
+        username: socket.username,
+        data: data
+      });
+      messageContent.save(socket.room, socket.username, data, (err, res) => {
+        if (err) console.log("error saving user text :" + err);
+      });
+    }
   });
 };
 
@@ -233,17 +235,22 @@ const normalUsersView = (socket, groupName, admin, usersArr) => {
 };
 
 const deleteUser = socket => {
-  socket.on("deleteUserFromGroup", user => {
-    getUsersFromGroup.delete(`${socket.room}:users`, user);
-    getUserGroups.delete(user, socket.room);
-    getUsersFromGroup.get(`${socket.room}:users`, (err, userArr) => {
-      GroupAdmins.getAdminByGroupName(`${socket.room}`, (err, admin) => {
-        socket.emit("adminsView", socket.room, admin, userArr);
+  socket.on("deleteUserFromGroup", (user, groupName) => {
+    getUsersFromGroup.delete(`${groupName}:users`, user);
+    getUserGroups.delete(user, groupName);
+    getUsersFromGroup.get(`${groupName}:users`, (err, userArr) => {
+      GroupAdmins.getAdminByGroupName(`${groupName}`, (err, admin) => {
+        socket.emit("adminsView", groupName, admin, userArr);
       });
       getUserGroups.get(user, (err, groupArr) => {
         getSocketDetailByUsername(user, socketObj => {
           if (socketObj) {
             socketObj.socket.emit("renderRooms", groupArr);
+            if (socketObj.socket.room === groupName) {
+              socketObj.socket.emit("disableInput", user);
+              socketObj.socket.leave(groupName);
+              socketObj.socket.join(defaultRoom);
+            }
           }
         });
       });
@@ -327,6 +334,7 @@ const deleteGroup = socket => {
                 else {
                   //console.log(groupArr);
                   socketObj.socket.emit("renderRooms", groupArr);
+                  socketObj.socket.leave(groupName);
                 }
               });
             }

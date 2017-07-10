@@ -4,6 +4,7 @@ let addUserButtonDivForAdmin = document.getElementById(
 );
 let exitGroupButtonDiv = document.getElementById("exit");
 let userContent = document.getElementById("userContent");
+let inputElement = document.getElementById("data");
 
 const socket = io();
 
@@ -25,6 +26,7 @@ const handleLogout = () => {
 let name = document.getElementById("name").innerHTML;
 
 socket.on("renderRooms", roomArr => {
+  document.getElementById("getGroupName").innerHTML = "groupName";
   document.getElementById("room-div").innerHTML = "";
   roomArr.forEach(room => {
     let templ =
@@ -43,6 +45,8 @@ socket.on("renderRooms", roomArr => {
 });
 
 const switchRoom = current_room => {
+  inputElement.disabled = false;
+  inputElement.classList.remove("input-disabled");
   socket.emit("loadRoomContent", current_room);
 };
 
@@ -76,6 +80,8 @@ const viewForAdmin = (groupName, admin, usersArr) => {
         `</b>` +
         `<a class = "delete is-small" onclick = "crossClicked(\`` +
         user +
+        `\`,\`` +
+        groupName +
         `\`)"></a><br/>`;
     } else {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
@@ -118,8 +124,8 @@ const exitGroupButtonClicked = groupName => {
   socket.emit("exitGroup", groupName);
 };
 
-const crossClicked = user => {
-  socket.emit("deleteUserFromGroup", user);
+const crossClicked = (user, groupName) => {
+  socket.emit("deleteUserFromGroup", user, groupName);
 };
 
 const addUserButtonClicked = () => {
@@ -192,3 +198,8 @@ group.onclick = () => {
     socket.emit("addGroup", groupName, user);
   };
 };
+
+socket.on("disableInput", user => {
+  inputElement.disabled = true;
+  inputElement.className += " input-disabled";
+});
