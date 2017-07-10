@@ -242,6 +242,13 @@ const deleteUser = socket => {
       GroupAdmins.getAdminByGroupName(`${socket.room}`, (err, admin) => {
         socket.emit("adminsView", socket.room, admin, userArr);
       });
+      getUserGroups.get(user, (err, groupArr) => {
+        getSocketDetailByUsername(user, socketObj => {
+          if (socketObj) {
+            socketObj.socket.emit("renderRooms", groupArr);
+          }
+        });
+      });
     });
   });
 };
