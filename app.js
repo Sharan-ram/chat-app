@@ -85,9 +85,7 @@ const createSocketDetailArr = socket => {
         socketId: socket.id,
         name: socket.username
       });
-      console.log(
-        "no socket object found in this name :" + socketDetailArr.length
-      );
+      //console.log("no socket object found in this name :" + socketDetailArr.length);
     }
   });
 };
@@ -321,7 +319,19 @@ const deleteGroup = socket => {
         usersArr.forEach(user => {
           getUserGroups.delete(user, groupName);
         });
-        getGroups(socket);
+        usersArr.forEach(user => {
+          getSocketDetailByUsername(user, socketObj => {
+            if (socketObj) {
+              getUserGroups.get(user, (err, groupArr) => {
+                if (err) console.log(err);
+                else {
+                  //console.log(groupArr);
+                  socketObj.socket.emit("renderRooms", groupArr);
+                }
+              });
+            }
+          });
+        });
       }
     });
   });
