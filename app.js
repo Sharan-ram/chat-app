@@ -53,8 +53,10 @@ app.get("/chat", chat.display);
 
 let defaultRoom = "";
 let username = "";
+let socketDetailArr = [];
 io.on("connection", socket => {
   getUsername(socket);
+  createSocketDetailArr(socket);
   setDefaultRoom(socket);
   getGroups(socket);
   switchUserGroup(socket);
@@ -65,12 +67,39 @@ io.on("connection", socket => {
   addNewUser(socket);
   exitFromGroup(socket);
   deleteGroup(socket);
-  //disconnect(socket);
+  disconnect(socket);
 });
 
 const getUsername = socket => {
   username = socket.handshake.session.name;
+  sessionId = socket.handshake.session.uid;
   socket.username = username;
+};
+
+const createSocketDetailArr = socket => {
+  getSocketDetailByUsername(socket.username, res => {
+    if (res === false) {
+      socketDetailArr.push({
+        sessionId: socket.handshake.session.uid,
+        socket: socket,
+        socketId: socket.id,
+        name: socket.username
+      });
+      console.log(
+        "no socket object found in this name :" + socketDetailArr.length
+      );
+    }
+  });
+};
+
+const getSocketDetailByUsername = (username, cb) => {
+  //console.log(sessionId);
+  socketDetailArr.forEach(socketObj => {
+    if (socketObj.name === username) {
+      return cb(socketObj);
+    }
+  });
+  return cb(false);
 };
 
 const setDefaultRoom = socket => {
@@ -133,9 +162,10 @@ const createGroup = socket => {
             });
             getUserGroups.save(user, groupName, (err, res) => {
               if (err) console.log("err saving room to added");
-              displayRoomsAfterAdding(socket, groupName, user);
+              //displayRoomsAfterAdding(socket, groupName, user);
             });
             getUsersFromGroup.save(`${groupName}:users`, user, socket.username);
+            showNewGroupToAddedMembers(groupName);
           }
         });
       } else {
@@ -153,12 +183,32 @@ const checkIfUserValid = (user, cb) => {
   });
 };
 
+/*
 const displayRoomsAfterAdding = socket => {
   getGroups(socket);
+};
+*/
+const showNewGroupToAddedMembers = groupName => {
+  getUsersFromGroup.get(`${groupName}:users`, (err, users) => {
+    users.forEach(user => {
+      getSocketDetailByUsername(user, socketObj => {
+        if (socketObj) {
+          getUserGroups.get(user, (err, groupArr) => {
+            if (err) console.log(err);
+            else {
+              //console.log(groupArr);
+              socketObj.socket.emit("renderRooms", groupArr);
+            }
+          });
+        }
+      });
+    });
+  });
 };
 
 const fetchUsersFromGroup = socket => {
   socket.on("getUsersInGroup", groupName => {
+    //console.log(groupName);
     GroupAdmins.getAdminByGroupName(groupName, (err, admin) => {
       if (err) console.log("error retrieving the admin :" + err);
       else {
@@ -256,6 +306,20 @@ const deleteGroup = socket => {
         getGroups(socket);
       }
     });
+  });
+};
+
+const disconnect = socket => {
+  socket.on("disconnect", () => {
+    getIndexOfSocketObjByUsername(socket, index => {
+      socketDetailArr.splice(index, 1);
+    });
+  });
+};
+
+const getIndexOfSocketObjByUsername = (socket, cb) => {
+  socketDetailArr.forEach((socketObj, index) => {
+    if (socketObj.name === socket.username) cb(index);
   });
 };
 

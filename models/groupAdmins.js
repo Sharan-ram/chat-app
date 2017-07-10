@@ -10,15 +10,17 @@ class GroupAdmins {
     });
   }
   static getAdminByGroupName(groupName, cb) {
+    //console.log("groupname inside models function is :" + groupName);
     db.lrange("groupsAdminSet", 0, -1, (err, res) => {
       //console.log("array is :" + res);
       if (err) return cb(err);
       res.forEach(groupAdminId => {
-        //console.log(groupAdminId);
+        //console.log("groupAdmin id to be stringified is :" + groupAdminId);
         groupAdminId = groupAdminId.replace(/\"/g, "");
         db.hgetall(groupAdminId, (err, group) => {
-          //console.log(group);
-          if (groupName === group.groupName) {
+          //console.log(err);
+          //console.log("particular group is :" + group);
+          if (groupName === group["groupName"]) {
             //console.log(groupName);
             return cb(err, group.admin);
           }

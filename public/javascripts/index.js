@@ -48,6 +48,7 @@ const switchRoom = current_room => {
 
 const getClickedGroupName = () => {
   let groupName = document.getElementById("getGroupName").innerHTML;
+  //console.log("am i getting the group name");
   socket.emit("getUsersInGroup", groupName);
 };
 
