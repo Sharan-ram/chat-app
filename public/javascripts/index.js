@@ -152,44 +152,13 @@ socket.on("renderRoomContent", obj => {
     obj.data.endsWith("was removed from the group") === false &&
     obj.data.endsWith("left the group") === false
   ) {
-    let templ =
-      "<h3 class='username'><strong>" +
-      obj.username +
-      ":" +
-      "</strong></h3> <p>" +
-      obj.data +
-      "</p>";
-    let divNode = document.createElement("div");
-    divNode.setAttribute("id", "texts");
-    divNode.innerHTML = templ;
-    document.getElementById("textMessages").appendChild(divNode);
+    normalText(obj);
   } else if (obj.data.endsWith("is added to the group") === true) {
-    let templ = `
-          <p>${obj.data}</p>
-      `;
-    let divNode = document.createElement("div");
-    divNode.className = "content";
-    divNode.setAttribute("id", "addUserTexts");
-    divNode.innerHTML = templ;
-    document.getElementById("textMessages").appendChild(divNode);
+    userAddition(obj);
   } else if (obj.data.endsWith("was removed from the group") === true) {
-    let templ = `
-          <p>${obj.data}</p>
-      `;
-    let divNode = document.createElement("div");
-    divNode.className = "content";
-    divNode.setAttribute("id", "deleteUserTexts");
-    divNode.innerHTML = templ;
-    document.getElementById("textMessages").appendChild(divNode);
+    userDeletion(obj);
   } else {
-    let templ = `
-          <p>${obj.data}</p>
-      `;
-    let divNode = document.createElement("div");
-    divNode.className = "content";
-    divNode.setAttribute("id", "deleteUserTexts");
-    divNode.innerHTML = templ;
-    document.getElementById("textMessages").appendChild(divNode);
+    userExit(obj);
   }
 });
 
@@ -230,6 +199,53 @@ group.onclick = () => {
     let user = document.getElementById("admin").value;
     socket.emit("addGroup", groupName, user);
   };
+};
+
+const normalText = obj => {
+  let templ =
+    "<h3 class='username'><strong>" +
+    obj.username +
+    ":" +
+    "</strong></h3> <p>" +
+    obj.data +
+    "</p>";
+  let divNode = document.createElement("div");
+  divNode.setAttribute("id", "texts");
+  divNode.innerHTML = templ;
+  document.getElementById("textMessages").appendChild(divNode);
+};
+
+const userAddition = obj => {
+  let templ = `
+        <p>${obj.data}</p>
+    `;
+  let divNode = document.createElement("div");
+  divNode.className = "content";
+  divNode.setAttribute("id", "addUserTexts");
+  divNode.innerHTML = templ;
+  document.getElementById("textMessages").appendChild(divNode);
+};
+
+const userDeletion = obj => {
+  let templ = `
+        <p>${obj.data}</p>
+    `;
+  let divNode = document.createElement("div");
+  divNode.className = "content";
+  divNode.setAttribute("id", "deleteUserTexts");
+  divNode.innerHTML = templ;
+  document.getElementById("textMessages").appendChild(divNode);
+};
+
+const userExit = obj => {
+  let templ = `
+        <p>${obj.data}</p>
+    `;
+  let divNode = document.createElement("div");
+  divNode.className = "content";
+  divNode.setAttribute("id", "deleteUserTexts");
+  divNode.innerHTML = templ;
+  document.getElementById("textMessages").appendChild(divNode);
 };
 
 socket.on("disableInput", user => {
