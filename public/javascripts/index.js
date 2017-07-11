@@ -149,7 +149,8 @@ socket.on("renderRoomContent", obj => {
   //document.getElementById("conversation").innerHTML = "";
   if (
     obj.data.endsWith("is added to the group") === false &&
-    obj.data.endsWith("was removed from the group") === false
+    obj.data.endsWith("was removed from the group") === false &&
+    obj.data.endsWith("left the group") === false
   ) {
     let templ =
       "<h3 class='username'><strong>" +
@@ -172,6 +173,15 @@ socket.on("renderRoomContent", obj => {
     divNode.innerHTML = templ;
     document.getElementById("textMessages").appendChild(divNode);
   } else if (obj.data.endsWith("was removed from the group") === true) {
+    let templ = `
+          <p>${obj.data}</p>
+      `;
+    let divNode = document.createElement("div");
+    divNode.className = "content";
+    divNode.setAttribute("id", "deleteUserTexts");
+    divNode.innerHTML = templ;
+    document.getElementById("textMessages").appendChild(divNode);
+  } else {
     let templ = `
           <p>${obj.data}</p>
       `;
@@ -233,4 +243,8 @@ socket.on("eventForAddingUser", (groupName, user) => {
 
 socket.on("eventForDeletingUser", (groupName, user) => {
   socket.emit("saveText", user + " was removed from the group");
+});
+
+socket.on("eventForExitingGroup", (groupName, user) => {
+  socket.emit("saveText", user + " left the group");
 });

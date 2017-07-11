@@ -296,9 +296,13 @@ const exitFromGroup = socket => {
   socket.on("exitGroup", groupName => {
     checkIfAdminExited(socket, groupName, res => {
       if (!res) {
+        socket.emit("eventForExitingGroup", groupName, socket.username);
         getUserGroups.delete(socket.username, groupName);
         getUsersFromGroup.delete(`${groupName}:users`, socket.username);
         getGroups(socket);
+        socket.emit("disableInput", socket.username);
+        socket.leave(groupName);
+        socket.join(defaultRoom);
       } else {
         console.log(socket.username + " is the admin");
       }
