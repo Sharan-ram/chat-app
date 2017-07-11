@@ -147,7 +147,10 @@ const toggleModal = () => {
 
 socket.on("renderRoomContent", obj => {
   //document.getElementById("conversation").innerHTML = "";
-  if (obj.data.endsWith("is added to the group") === false) {
+  if (
+    obj.data.endsWith("is added to the group") === false &&
+    obj.data.endsWith("was removed from the group") === false
+  ) {
     let templ =
       "<h3 class='username'><strong>" +
       obj.username +
@@ -159,13 +162,22 @@ socket.on("renderRoomContent", obj => {
     divNode.setAttribute("id", "texts");
     divNode.innerHTML = templ;
     document.getElementById("textMessages").appendChild(divNode);
-  } else {
+  } else if (obj.data.endsWith("is added to the group") === true) {
     let templ = `
-        <p>${obj.data}</p>
-    `;
+          <p>${obj.data}</p>
+      `;
     let divNode = document.createElement("div");
     divNode.className = "content";
-    divNode.setAttribute("id", "addOrDeleteUserTexts");
+    divNode.setAttribute("id", "addUserTexts");
+    divNode.innerHTML = templ;
+    document.getElementById("textMessages").appendChild(divNode);
+  } else if (obj.data.endsWith("was removed from the group") === true) {
+    let templ = `
+          <p>${obj.data}</p>
+      `;
+    let divNode = document.createElement("div");
+    divNode.className = "content";
+    divNode.setAttribute("id", "deleteUserTexts");
     divNode.innerHTML = templ;
     document.getElementById("textMessages").appendChild(divNode);
   }
@@ -217,4 +229,8 @@ socket.on("disableInput", user => {
 
 socket.on("eventForAddingUser", (groupName, user) => {
   socket.emit("saveText", user + " is added to the group");
+});
+
+socket.on("eventForDeletingUser", (groupName, user) => {
+  socket.emit("saveText", user + " was removed from the group");
 });

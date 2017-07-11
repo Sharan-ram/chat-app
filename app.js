@@ -251,6 +251,7 @@ const deleteUser = socket => {
         });
       });
     });
+    socket.emit("eventForDeletingUser", groupName, user);
   });
 };
 

@@ -136,10 +136,19 @@
   cursor:pointer;
 }
 
-#addOrDeleteUserTexts {
+#addUserTexts {
   min-width:50%;
   display:block;
   background-color: #54F431;
+  margin:30px;
+  padding:5px;
+}
+
+#deleteUserTexts {
+  min-width:50%;
+  color:white;
+  display:block;
+  background-color: #D53320;
   margin:30px;
   padding:5px;
 }
