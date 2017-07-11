@@ -147,17 +147,28 @@ const toggleModal = () => {
 
 socket.on("renderRoomContent", obj => {
   //document.getElementById("conversation").innerHTML = "";
-  let templ =
-    "<h3 class='username'><strong>" +
-    obj.username +
-    ":" +
-    "</strong></h3> <p>" +
-    obj.data +
-    "</p>";
-  let divNode = document.createElement("div");
-  divNode.setAttribute("id", "texts");
-  divNode.innerHTML = templ;
-  document.getElementById("textMessages").appendChild(divNode);
+  if (obj.data.endsWith("is added to the group") === false) {
+    let templ =
+      "<h3 class='username'><strong>" +
+      obj.username +
+      ":" +
+      "</strong></h3> <p>" +
+      obj.data +
+      "</p>";
+    let divNode = document.createElement("div");
+    divNode.setAttribute("id", "texts");
+    divNode.innerHTML = templ;
+    document.getElementById("textMessages").appendChild(divNode);
+  } else {
+    let templ = `
+        <p>${obj.data}</p>
+    `;
+    let divNode = document.createElement("div");
+    divNode.className = "content";
+    divNode.setAttribute("id", "addOrDeleteUserTexts");
+    divNode.innerHTML = templ;
+    document.getElementById("textMessages").appendChild(divNode);
+  }
 });
 
 socket.on("clearConversationDom", current_room => {
@@ -202,4 +213,8 @@ group.onclick = () => {
 socket.on("disableInput", user => {
   inputElement.disabled = true;
   inputElement.className += " input-disabled";
+});
+
+socket.on("eventForAddingUser", (groupName, user) => {
+  socket.emit("saveText", user + " is added to the group");
 });

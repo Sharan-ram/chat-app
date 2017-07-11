@@ -135,3 +135,11 @@
   color:black;
   cursor:pointer;
 }
+
+#addOrDeleteUserTexts {
+  min-width:50%;
+  display:block;
+  background-color: #54F431;
+  margin:30px;
+  padding:5px;
+}

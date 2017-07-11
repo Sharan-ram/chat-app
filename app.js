@@ -166,6 +166,7 @@ const createGroup = socket => {
             });
             getUsersFromGroup.save(`${groupName}:users`, user, socket.username);
             showNewGroupToAddedMembers(groupName);
+            socket.emit("eventForAddingUser", groupName, user);
           }
         });
       } else {
@@ -183,11 +184,6 @@ const checkIfUserValid = (user, cb) => {
   });
 };
 
-/*
-const displayRoomsAfterAdding = socket => {
-  getGroups(socket);
-};
-*/
 const showNewGroupToAddedMembers = groupName => {
   getUsersFromGroup.get(`${groupName}:users`, (err, users) => {
     users.forEach(user => {
@@ -291,6 +287,7 @@ const addNewUser = socket => {
         });
       }
     });
+    socket.emit("eventForAddingUser", socket.room, user);
   });
 };
 
