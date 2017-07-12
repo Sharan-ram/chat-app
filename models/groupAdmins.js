@@ -6,7 +6,7 @@ class GroupAdmins {
   static save(groupName, adder, cb) {
     db.incr("groupAdmin:ids", (err, id) => {
       if (err) return cb(err);
-      db.hmset(`groupAdmin:${id}`, "groupName", groupName, "admin", adder);
+      db.hmset(`groupAdmin:${id}`, "groupId", `group:${id}`, "admin", adder);
       db.rpush("groupsAdminSet", JSON.stringify(`groupAdmin:${id}`), cb);
     });
   }

@@ -25,29 +25,28 @@ const handleLogout = () => {
 
 let name = document.getElementById("name").innerHTML;
 
-socket.on("renderRooms", roomArr => {
+socket.on("renderRooms", obj => {
   document.getElementById("getGroupName").innerHTML = "groupName";
   document.getElementById("room-div").innerHTML = "";
-  roomArr.forEach(room => {
-    let templ =
-      `<a class = "button is-light is-fullwidth"><h2 class="has-text-left" ><b>` +
-      room +
-      `</b></h2></a>`;
-    let divnode = document.createElement("div");
-    divnode.setAttribute("id", "rooms");
 
-    divnode.innerHTML = templ;
-    document.getElementById("room-div").appendChild(divnode);
-    divnode.onclick = () => {
-      switchRoom(room);
-    };
-  });
+  let templ =
+    `<a class = "button is-light is-fullwidth"><h2 class="has-text-left" ><b>` +
+    obj.groupName +
+    `</b></h2></a>`;
+  let divnode = document.createElement("div");
+  divnode.setAttribute("id", "rooms");
+
+  divnode.innerHTML = templ;
+  document.getElementById("room-div").appendChild(divnode);
+  divnode.onclick = () => {
+    switchRoom(obj.id, obj.groupName);
+  };
 });
 
-const switchRoom = current_room => {
+const switchRoom = (groupId, groupName) => {
   inputElement.disabled = false;
   inputElement.classList.remove("input-disabled");
-  socket.emit("loadRoomContent", current_room);
+  socket.emit("loadRoomContent", groupId, groupName);
 };
 
 const getClickedGroupName = () => {

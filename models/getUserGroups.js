@@ -2,8 +2,10 @@ const redis = require("redis");
 const db = redis.createClient();
 
 class getUserGroups {
-  static save(username, group, cb) {
-    db.lpush(username, group, cb);
+  static save(username, cb) {
+    db.get(`group:ids`, (err, id) => {
+      db.lpush(username, `group:${id}`, cb);
+    });
   }
 
   static delete(username, group) {

@@ -23,6 +23,7 @@ const GroupAdmins = require("./models/groupAdmins");
 const DeleteUser = require("./models/deleteUser");
 const cookieParser = require("cookie-parser");
 const sharedsession = require("express-socket.io-session");
+const Room = require("./models/room");
 // rendering ejs
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -106,21 +107,27 @@ const setDefaultRoom = socket => {
 
 const getGroups = socket => {
   //console.log(socket.username);
-  getUserGroups.get(socket.username, (err, groupArr) => {
+  getUserGroups.get(socket.username, (err, groupIdArr) => {
     if (err) console.log(err);
     else {
       //console.log(groupArr);
-      socket.emit("renderRooms", groupArr);
+      groupIdArr.forEach(groupId => {
+        groupId = groupId.replace(/\"/g, "");
+        Room.getGroupNameById(groupId, (err, groupIdObj) => {
+          socket.emit("renderRooms", groupIdObj);
+        });
+      });
     }
   });
 };
 
 const switchUserGroup = socket => {
-  socket.on("loadRoomContent", group => {
+  socket.on("loadRoomContent", (groupId, groupName) => {
+    console.log(groupId, groupName);
     socket.leave(socket.room);
-    socket.join(group);
-    socket.room = group;
-    groupContent.get(group, (err, content) => {
+    socket.join(`group:${groupId}`);
+    socket.room = `group:${groupId}`;
+    groupContent.get(`group:${groupId}`, (err, content) => {
       if (err) console.log(err);
       else {
         socket.emit("clearConversationDom", socket.room);
@@ -138,7 +145,7 @@ const switchUserGroup = socket => {
 
 const saveUserChat = socket => {
   socket.on("saveText", data => {
-    if (data !== "" && (socket.room && socket.room !== "")) {
+    if (data !== "" && socket.room !== "") {
       io.in(socket.room).emit("renderRoomContent", {
         username: socket.username,
         data: data
@@ -154,25 +161,53 @@ const createGroup = socket => {
   socket.on("addGroup", (groupName, user) => {
     checkIfUserValid(user, res => {
       if (res === true) {
-        GroupAdmins.save(groupName, socket.username, (err, res) => {
-          if (err) console.log("error creating group :" + err);
-          else {
-            getUserGroups.save(socket.username, groupName, (err, res) => {
-              if (err) console.log("err saving room to adder");
-            });
-            getUserGroups.save(user, groupName, (err, res) => {
-              if (err) console.log("err saving room to added");
-              //displayRoomsAfterAdding(socket, groupName, user);
-            });
-            getUsersFromGroup.save(`${groupName}:users`, user, socket.username);
-            showNewGroupToAddedMembers(groupName);
-            socket.emit("eventForAddingUser", groupName, user);
-          }
-        });
+        saveGroupAdmin(groupName, socket, user);
       } else {
         getGroups(socket);
       }
     });
+  });
+};
+
+const saveGroupAdmin = (groupName, socket, user) => {
+  GroupAdmins.save(groupName, socket.username, (err, res) => {
+    if (err) console.log("error creating group :" + err);
+    else {
+      Room.save(groupName, (err, res) => {
+        if (err) console.log("err saving group :" + err);
+        else {
+          saveGroupToAdder(groupName, socket);
+          saveGroupToAddedUser(user, groupName, socket);
+          saveNewUsersToGroupUsersArr(groupName, socket, user);
+        }
+      });
+    }
+  });
+};
+
+const saveGroupToAdder = (groupName, socket) => {
+  Room.getCurrentId(id => {
+    getUserGroups.save(socket.username, `group:${id}`, (err, res) => {
+      if (err) console.log("err saving room to adder");
+    });
+  });
+};
+
+const saveGroupToAddedUser = (user, groupName, socket) => {
+  Room.getCurrentId(id => {
+    getUserGroups.save(user, `group:${id}`, (err, res) => {
+      if (err) console.log("err saving room to added");
+      //displayRoomsAfterAdding(socket, groupName, user);
+    });
+  });
+};
+
+const saveNewUsersToGroupUsersArr = (groupName, socket, user) => {
+  Room.getCurrentId(id => {
+    //console.log(".............." + id);
+    getUsersFromGroup.save(`group:${id}`, user, socket.username);
+    showNewGroupToAddedMembers(groupName, socket);
+    socket.emit("eventForAddingUser", groupName, user);
   });
 };
 
@@ -184,19 +219,26 @@ const checkIfUserValid = (user, cb) => {
   });
 };
 
-const showNewGroupToAddedMembers = groupName => {
-  getUsersFromGroup.get(`${groupName}:users`, (err, users) => {
-    users.forEach(user => {
-      getSocketDetailByUsername(user, socketObj => {
-        if (socketObj) {
-          getUserGroups.get(user, (err, groupArr) => {
-            if (err) console.log(err);
-            else {
-              //console.log(groupArr);
-              socketObj.socket.emit("renderRooms", groupArr);
-            }
-          });
-        }
+const showNewGroupToAddedMembers = (groupName, socket) => {
+  Room.getCurrentId(id => {
+    getUsersFromGroup.get(`group:${id}:users`, (err, users) => {
+      users.forEach(user => {
+        getSocketDetailByUsername(user, socketObj => {
+          if (socketObj) {
+            getUserGroups.get(user, (err, groupIdArr) => {
+              if (err) console.log(err);
+              else {
+                //console.log(groupArr);
+                groupIdArr.forEach(groupId => {
+                  groupId = groupId.replace(/\"/g, "");
+                  Room.getGroupNameById(groupId, (err, groupIdObj) => {
+                    socket.emit("renderRooms", groupIdObj);
+                  });
+                });
+              }
+            });
+          }
+        });
       });
     });
   });
