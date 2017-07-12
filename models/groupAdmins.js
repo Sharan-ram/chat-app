@@ -1,5 +1,6 @@
 const redis = require("redis");
 const db = redis.createClient();
+const getUsersFromGroup = require("./getUsersFromGroup.js");
 
 class GroupAdmins {
   static save(groupName, adder, cb) {
@@ -9,6 +10,7 @@ class GroupAdmins {
       db.rpush("groupsAdminSet", JSON.stringify(`groupAdmin:${id}`), cb);
     });
   }
+
   static getAdminByGroupName(groupName, cb) {
     //console.log("groupname inside models function is :" + groupName);
     db.lrange("groupsAdminSet", 0, -1, (err, res) => {
@@ -18,14 +20,43 @@ class GroupAdmins {
         //console.log("groupAdmin id to be stringified is :" + groupAdminId);
         groupAdminId = groupAdminId.replace(/\"/g, "");
         db.hgetall(groupAdminId, (err, group) => {
-          //console.log(err);
-          //console.log("particular group is :" + group);
-          if (groupName === group["groupName"]) {
-            //console.log(groupName);
-            return cb(err, group.admin);
+          if (group) {
+            console.log(groupAdminId);
+            //console.log(err);
+            //console.log("particular group is :" + group);
+            if (groupName === group["groupName"]) {
+              //console.log(groupName);
+              return cb(err, group.admin);
+            }
           }
         });
       });
+    });
+  }
+
+  static changeAdmin(groupName, cb) {
+    db.lrange("groupsAdminSet", 0, -1, (err, res) => {
+      if (err) console.log("err retrieving groupsAdminSet:" + err);
+      else {
+        res.forEach(groupAdminId => {
+          //console.log(groupAdminId + " groupAdminId");
+          groupAdminId = groupAdminId.replace(/\"/g, "");
+          db.hgetall(groupAdminId, (err, group) => {
+            //console.log(group + " group");
+            if (groupName === group["groupName"]) {
+              getUsersFromGroup.get(`${groupName}:users`, (err, usersArr) => {
+                if (err) console.log("err retrieving users array:" + err);
+                else {
+                  //console.log(usersArr + " usersArr");
+                  db.del(groupAdminId);
+                  cb(err, usersArr);
+                  //console.log(group["admin"] + " group admin");
+                }
+              });
+            }
+          });
+        });
+      }
     });
   }
 }
@@ -40,3 +71,5 @@ module.exports = GroupAdmins;
   console.log(admin);
 });
 */
+
+//GroupAdmins.changeAdmin("test20");

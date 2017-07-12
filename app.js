@@ -299,6 +299,7 @@ const exitFromGroup = socket => {
         socket.emit("eventForExitingGroup", groupName, socket.username);
         getUserGroups.delete(socket.username, groupName);
         getUsersFromGroup.delete(`${groupName}:users`, socket.username);
+
         getGroups(socket);
         socket.emit("disableInput", socket.username);
         socket.leave(groupName);
@@ -311,11 +312,28 @@ const exitFromGroup = socket => {
 };
 
 const checkIfAdminExited = (socket, groupName, cb) => {
+  //console.log(groupName);
   GroupAdmins.getAdminByGroupName(groupName, (err, admin) => {
     if (err) console.log("err retrieving admin :" + err);
     else {
-      if (socket.username === admin) cb(true);
-      else cb(false);
+      //console.log("admin is " + admin);
+      if (socket.username === admin) {
+        //console.log(socket.username + " username ");
+        GroupAdmins.changeAdmin(groupName, (err, usersArr) => {
+          GroupAdmins.save(groupName, usersArr[0], (err, res) => {
+            if (err) console.log(err);
+            else console.log(res);
+          });
+        });
+        socket.emit("eventForExitingGroup", groupName, socket.username);
+        getUserGroups.delete(socket.username, groupName);
+        getUsersFromGroup.delete(`${groupName}:users`, socket.username);
+        getGroups(socket);
+        socket.emit("disableInput", socket.username);
+        socket.leave(groupName);
+        socket.join(defaultRoom);
+        cb(true);
+      } else cb(false);
     }
   });
 };

@@ -87,7 +87,10 @@ const viewForAdmin = (groupName, admin, usersArr) => {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
     }
   });
-  exitGroupButtonDiv.innerHTML = `<a class = "button is-dark" id="exitGroupButton" onclick = "exitGroupButtonClicked()">Exit group</a>`;
+  exitGroupButtonDiv.innerHTML =
+    `<a class = "button is-dark" id="exitGroupButton" onclick = "exitGroupButtonClicked(\`` +
+    groupName +
+    `\`)">Exit group</a>`;
   deleteGroupButtonDiv.innerHTML =
     `<a class = "button is-danger" id="deleteGroupButton" onclick = "deleteGroupButtonClicked(\`` +
     groupName +
