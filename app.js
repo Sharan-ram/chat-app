@@ -123,19 +123,21 @@ const getGroups = socket => {
 
 const switchUserGroup = socket => {
   socket.on("loadRoomContent", (groupId, groupName) => {
-    console.log(groupId, groupName);
+    //console.log(groupId, groupName);
     socket.leave(socket.room);
     socket.join(`group:${groupId}`);
     socket.room = `group:${groupId}`;
     groupContent.get(`group:${groupId}`, (err, content) => {
       if (err) console.log(err);
       else {
-        socket.emit("clearConversationDom", socket.room);
-        content.forEach(obj => {
-          obj = obj.replace(/\"/g, "");
-          messageContent.get(obj, (err, messageData) => {
-            if (err) console.log("err retrieving conversation :" + err);
-            else socket.emit("renderRoomContent", messageData);
+        Room.getGroupNameById(socket.room, (err, roomObj) => {
+          socket.emit("clearConversationDom", roomObj);
+          content.forEach(obj => {
+            obj = obj.replace(/\"/g, "");
+            messageContent.get(obj, (err, messageData) => {
+              if (err) console.log("err retrieving conversation :" + err);
+              else socket.emit("renderRoomContent", messageData);
+            });
           });
         });
       }

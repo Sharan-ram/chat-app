@@ -164,9 +164,9 @@ socket.on("renderRoomContent", obj => {
   }
 });
 
-socket.on("clearConversationDom", current_room => {
+socket.on("clearConversationDom", roomObj => {
   document.getElementById("textMessages").innerHTML = "";
-  document.getElementById("getGroupName").innerHTML = current_room;
+  document.getElementById("getGroupName").innerHTML = roomObj.groupName;
 });
 
 let sendButton = document.getElementById("send");
