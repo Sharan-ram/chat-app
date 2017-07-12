@@ -21,7 +21,7 @@ class GroupAdmins {
         groupAdminId = groupAdminId.replace(/\"/g, "");
         db.hgetall(groupAdminId, (err, group) => {
           if (group) {
-            console.log(groupAdminId);
+            //console.log(groupAdminId);
             //console.log(err);
             //console.log("particular group is :" + group);
             if (groupName === group["groupName"]) {

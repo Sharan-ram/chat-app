@@ -265,5 +265,6 @@ socket.on("eventForDeletingUser", (groupName, user) => {
 });
 
 socket.on("eventForExitingGroup", (groupName, user) => {
+  document.getElementById("modal").classList.remove("is-active");
   socket.emit("saveText", user + " left the group");
 });
