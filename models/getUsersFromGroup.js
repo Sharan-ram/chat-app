@@ -10,8 +10,8 @@ class getUsersFromGroup {
     db.lrem(groupName, 1, user);
   }
 
-  static get(groupName, cb) {
-    db.lrange(groupName, 0, -1, cb);
+  static get(groupId, cb) {
+    db.lrange(`${groupId}:users`, 0, -1, cb);
   }
 }
 

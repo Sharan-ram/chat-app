@@ -111,6 +111,7 @@ const getGroups = socket => {
     if (err) console.log(err);
     else {
       //console.log(groupArr);
+      socket.emit("clearRoomDiv", socket.room);
       groupIdArr.forEach(groupId => {
         groupId = groupId.replace(/\"/g, "");
         Room.getGroupNameById(groupId, (err, groupIdObj) => {
@@ -130,6 +131,7 @@ const switchUserGroup = socket => {
     groupContent.get(`group:${groupId}`, (err, content) => {
       if (err) console.log(err);
       else {
+        console.log("socket room is :" + socket.room);
         Room.getGroupNameById(socket.room, (err, roomObj) => {
           socket.emit("clearConversationDom", roomObj);
           content.forEach(obj => {
@@ -191,7 +193,7 @@ const saveGroupToAdder = (groupName, socket) => {
   Room.getCurrentId(id => {
     getUserGroups.save(socket.username, `group:${id}`, (err, res) => {
       if (err) console.log("err saving room to adder");
-      else console.log("group added to :" + socket.username);
+      //else console.log("group added to :" + socket.username);
     });
   });
 };
@@ -202,7 +204,8 @@ const saveGroupToAddedUser = (user, groupName, socket) => {
       if (err) console.log("err saving room to added");
       else
         //displayRoomsAfterAdding(socket, groupName, user);
-        console.log("group added to :" + user);
+        //console.log("group added to :" + user);
+        socket.emit("eventForAddingUser", socket.room, user);
     });
   });
 };
@@ -226,7 +229,7 @@ const checkIfUserValid = (user, cb) => {
 
 const showNewGroupToAddedMembers = (groupName, socket) => {
   Room.getCurrentId(id => {
-    getUsersFromGroup.get(`group:${id}:users`, (err, users) => {
+    getUsersFromGroup.get(`group:${id}`, (err, users) => {
       users.forEach(user => {
         getSocketDetailByUsername(user, socketObj => {
           if (socketObj) {
@@ -250,18 +253,19 @@ const showNewGroupToAddedMembers = (groupName, socket) => {
 };
 
 const fetchUsersFromGroup = socket => {
-  socket.on("getUsersInGroup", groupName => {
+  socket.on("getUsersInGroup", roomObj => {
+    console.log(roomObj);
     //console.log(groupName);
-    GroupAdmins.getAdminByGroupName(groupName, (err, admin) => {
+    GroupAdmins.getAdminByGroupId(`group:${roomObj.id}`, (err, admin) => {
       if (err) console.log("error retrieving the admin :" + err);
       else {
         let adminOfGroup = admin;
-        getUsersFromGroup.get(`${groupName}:users`, (err, usersArr) => {
+        getUsersFromGroup.get(`group:${roomObj.id}:users`, (err, usersArr) => {
           if (err) console.log("error retrieving users from a group:" + err);
           else {
             if (socket.username === adminOfGroup) {
-              adminViewOfUsers(socket, groupName, adminOfGroup, usersArr);
-            } else normalUsersView(socket, groupName, adminOfGroup, usersArr);
+              adminViewOfUsers(socket, roomObj, adminOfGroup, usersArr);
+            } else normalUsersView(socket, roomObj, adminOfGroup, usersArr);
           }
         });
       }
@@ -269,12 +273,12 @@ const fetchUsersFromGroup = socket => {
   });
 };
 
-const adminViewOfUsers = (socket, groupName, admin, usersArr) => {
-  socket.emit("adminsView", groupName, admin, usersArr);
+const adminViewOfUsers = (socket, roomObj, admin, usersArr) => {
+  socket.emit("adminsView", roomObj, admin, usersArr);
 };
 
-const normalUsersView = (socket, groupName, admin, usersArr) => {
-  socket.emit("usersView", groupName, admin, usersArr);
+const normalUsersView = (socket, roomObj, admin, usersArr) => {
+  socket.emit("usersView", roomObj, admin, usersArr);
 };
 
 const deleteUser = socket => {
@@ -282,7 +286,7 @@ const deleteUser = socket => {
     getUsersFromGroup.delete(`${groupName}:users`, user);
     getUserGroups.delete(user, groupName);
     getUsersFromGroup.get(`${groupName}:users`, (err, userArr) => {
-      GroupAdmins.getAdminByGroupName(`${groupName}`, (err, admin) => {
+      GroupAdmins.getAdminByGroupId(`${groupName}`, (err, admin) => {
         socket.emit("adminsView", groupName, admin, userArr);
       });
       getUserGroups.get(user, (err, groupArr) => {
@@ -313,12 +317,9 @@ const addNewUser = socket => {
               if (err) console.log("error saving new user :" + err);
             });
             getUsersFromGroup.get(`${socket.room}:users`, (err, userArr) => {
-              GroupAdmins.getAdminByGroupName(
-                `${socket.room}`,
-                (err, admin) => {
-                  socket.emit("adminsView", socket.room, admin, userArr);
-                }
-              );
+              GroupAdmins.getAdminByGroupId(`${socket.room}`, (err, admin) => {
+                socket.emit("adminsView", socket.room, admin, userArr);
+              });
             });
             getSocketDetailByUsername(user, socketObj => {
               if (socketObj) {
@@ -360,7 +361,7 @@ const exitFromGroup = socket => {
 
 const checkIfAdminExited = (socket, groupName, cb) => {
   //console.log(groupName);
-  GroupAdmins.getAdminByGroupName(groupName, (err, admin) => {
+  GroupAdmins.getAdminByGroupId(groupName, (err, admin) => {
     if (err) console.log("err retrieving admin :" + err);
     else {
       //console.log("admin is " + admin);

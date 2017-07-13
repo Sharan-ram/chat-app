@@ -25,9 +25,12 @@ const handleLogout = () => {
 
 let name = document.getElementById("name").innerHTML;
 
+socket.on("clearRoomDiv", room => {
+  document.getElementById("room-div").innerHTML = "";
+});
+
 socket.on("renderRooms", obj => {
   document.getElementById("getGroupName").innerHTML = "groupName";
-  document.getElementById("room-div").innerHTML = "";
 
   let templ =
     `<a class = "button is-light is-fullwidth"><h2 class="has-text-left" ><b>` +
@@ -49,21 +52,15 @@ const switchRoom = (groupId, groupName) => {
   socket.emit("loadRoomContent", groupId, groupName);
 };
 
-const getClickedGroupName = () => {
-  let groupName = document.getElementById("getGroupName").innerHTML;
-  //console.log("am i getting the group name");
-  socket.emit("getUsersInGroup", groupName);
-};
-
-socket.on("adminsView", (groupName, admin, usersArr) => {
-  viewForAdmin(groupName, admin, usersArr);
+socket.on("adminsView", (roomObj, admin, usersArr) => {
+  viewForAdmin(roomObj, admin, usersArr);
 });
 
-socket.on("usersView", (groupName, admin, usersArr) => {
-  viewForUser(groupName, admin, usersArr);
+socket.on("usersView", (roomObj, admin, usersArr) => {
+  viewForUser(roomObj, admin, usersArr);
 });
 
-const viewForAdmin = (groupName, admin, usersArr) => {
+const viewForAdmin = (roomObj, admin, usersArr) => {
   deleteGroupButtonDiv.innerHTML = "";
   exitGroupButtonDiv.innerHTML = "";
   addUserButtonDivForAdmin.innerHTML = "";
@@ -80,7 +77,7 @@ const viewForAdmin = (groupName, admin, usersArr) => {
         `<a class = "delete is-small" onclick = "crossClicked(\`` +
         user +
         `\`,\`` +
-        groupName +
+        roomObj +
         `\`)"></a><br/>`;
     } else {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
@@ -88,16 +85,16 @@ const viewForAdmin = (groupName, admin, usersArr) => {
   });
   exitGroupButtonDiv.innerHTML =
     `<a class = "button is-dark" id="exitGroupButton" onclick = "exitGroupButtonClicked(\`` +
-    groupName +
+    roomObj +
     `\`)">Exit group</a>`;
   deleteGroupButtonDiv.innerHTML =
     `<a class = "button is-danger" id="deleteGroupButton" onclick = "deleteGroupButtonClicked(\`` +
-    groupName +
+    roomObj +
     `\`)">Delete Group</a>`;
   addUserButtonDivForAdmin.innerHTML = `<a class = "button is-primary" id="addUserButtonForAdmin" onclick = "addUserButtonClicked()">Add User</a>`;
 };
 
-const viewForUser = (groupName, admin, usersArr) => {
+const viewForUser = (roomObj, admin, usersArr) => {
   addUserButtonDivForAdmin.innerHTML = "";
   deleteGroupButtonDiv.innerHTML = "";
   exitGroupButtonDiv.innerHTML = "";
@@ -114,20 +111,20 @@ const viewForUser = (groupName, admin, usersArr) => {
   });
   exitGroupButtonDiv.innerHTML =
     `<a class = "button is-danger" id="exitGroupButton" onclick = "exitGroupButtonClicked(\`` +
-    groupName +
+    roomObj +
     `\`)">Exit group</a>`;
 };
 
-const deleteGroupButtonClicked = groupName => {
-  socket.emit("deleteGroupByAdmin", groupName);
+const deleteGroupButtonClicked = roomObj => {
+  socket.emit("deleteGroupByAdmin", roomObj);
 };
 
-const exitGroupButtonClicked = groupName => {
-  socket.emit("exitGroup", groupName);
+const exitGroupButtonClicked = roomObj => {
+  socket.emit("exitGroup", roomObj);
 };
 
-const crossClicked = (user, groupName) => {
-  socket.emit("deleteUserFromGroup", user, groupName);
+const crossClicked = (user, roomObj) => {
+  socket.emit("deleteUserFromGroup", user, roomObj);
 };
 
 const addUserButtonClicked = () => {
@@ -165,8 +162,15 @@ socket.on("renderRoomContent", obj => {
 });
 
 socket.on("clearConversationDom", roomObj => {
+  console.log("roomObj inside conversation dom " + roomObj);
   document.getElementById("textMessages").innerHTML = "";
-  document.getElementById("getGroupName").innerHTML = roomObj.groupName;
+  let getGroupName = document.getElementById("getGroupName");
+  getGroupName.innerHTML = roomObj.groupName;
+  let displayGroupName = document.getElementById("displayGroupName");
+  displayGroupName.onclick = () => {
+    getClickedGroupName(roomObj);
+  };
+  //groupName.onclick = getClickedGroupName(roomObj);
 });
 
 let sendButton = document.getElementById("send");
@@ -267,3 +271,15 @@ socket.on("eventForExitingGroup", (groupName, user) => {
   document.getElementById("modal").classList.remove("is-active");
   socket.emit("saveText", user + " left the group");
 });
+
+/*
+let displayGroupName = document.getElementById('displayGroupName');
+displayGroupName.onclick = () => {
+  let getGroupName = document.getElementById('getGroupName').innerHTML;
+}
+*/
+
+const getClickedGroupName = roomObj => {
+  //let getGroupName = document.getElementById("getGroupName").innerHTML;
+  socket.emit("getUsersInGroup", roomObj);
+};

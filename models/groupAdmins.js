@@ -11,7 +11,7 @@ class GroupAdmins {
     });
   }
 
-  static getAdminByGroupName(groupName, cb) {
+  static getAdminByGroupId(groupId, cb) {
     //console.log("groupname inside models function is :" + groupName);
     db.lrange("groupsAdminSet", 0, -1, (err, res) => {
       //console.log("array is :" + res);
@@ -24,7 +24,7 @@ class GroupAdmins {
             //console.log(groupAdminId);
             //console.log(err);
             //console.log("particular group is :" + group);
-            if (groupName === group["groupName"]) {
+            if (groupId === group["groupId"]) {
               //console.log(groupName);
               return cb(err, group.admin);
             }
