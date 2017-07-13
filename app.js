@@ -191,6 +191,7 @@ const saveGroupToAdder = (groupName, socket) => {
   Room.getCurrentId(id => {
     getUserGroups.save(socket.username, `group:${id}`, (err, res) => {
       if (err) console.log("err saving room to adder");
+      else console.log("group added to :" + socket.username);
     });
   });
 };
@@ -199,7 +200,9 @@ const saveGroupToAddedUser = (user, groupName, socket) => {
   Room.getCurrentId(id => {
     getUserGroups.save(user, `group:${id}`, (err, res) => {
       if (err) console.log("err saving room to added");
-      //displayRoomsAfterAdding(socket, groupName, user);
+      else
+        //displayRoomsAfterAdding(socket, groupName, user);
+        console.log("group added to :" + user);
     });
   });
 };
