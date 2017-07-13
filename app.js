@@ -131,7 +131,7 @@ const switchUserGroup = socket => {
     groupContent.get(`group:${groupId}`, (err, content) => {
       if (err) console.log(err);
       else {
-        console.log("socket room is :" + socket.room);
+        //console.log("socket room is :" + socket.room);
         Room.getGroupNameById(socket.room, (err, roomObj) => {
           socket.emit("clearConversationDom", roomObj);
           content.forEach(obj => {
@@ -193,7 +193,10 @@ const saveGroupToAdder = (groupName, socket) => {
   Room.getCurrentId(id => {
     getUserGroups.save(socket.username, `group:${id}`, (err, res) => {
       if (err) console.log("err saving room to adder");
-      //else console.log("group added to :" + socket.username);
+      else {
+        //else console.log("group added to :" + socket.username);
+        getGroups(socket);
+      }
     });
   });
 };
@@ -202,10 +205,14 @@ const saveGroupToAddedUser = (user, groupName, socket) => {
   Room.getCurrentId(id => {
     getUserGroups.save(user, `group:${id}`, (err, res) => {
       if (err) console.log("err saving room to added");
-      else
-        //displayRoomsAfterAdding(socket, groupName, user);
-        //console.log("group added to :" + user);
-        socket.emit("eventForAddingUser", socket.room, user);
+      else {
+        getSocketDetailByUsername(user, socketObj => {
+          if (socketObj) {
+            console.log(socketObj.socket.username + " is also online");
+            getGroups(socketObj.socket);
+          }
+        });
+      }
     });
   });
 };
@@ -214,8 +221,7 @@ const saveNewUsersToGroupUsersArr = (groupName, socket, user) => {
   Room.getCurrentId(id => {
     //console.log(".............." + id);
     getUsersFromGroup.save(`group:${id}`, user, socket.username);
-    showNewGroupToAddedMembers(groupName, socket);
-    socket.emit("eventForAddingUser", groupName, user);
+    //showNewGroupToAddedMembers(groupName, socket);
   });
 };
 
@@ -224,31 +230,6 @@ const checkIfUserValid = (user, cb) => {
     if (!userDetails.id) {
       cb(false);
     } else cb(true);
-  });
-};
-
-const showNewGroupToAddedMembers = (groupName, socket) => {
-  Room.getCurrentId(id => {
-    getUsersFromGroup.get(`group:${id}`, (err, users) => {
-      users.forEach(user => {
-        getSocketDetailByUsername(user, socketObj => {
-          if (socketObj) {
-            getUserGroups.get(user, (err, groupIdArr) => {
-              if (err) console.log(err);
-              else {
-                //console.log(groupArr);
-                groupIdArr.forEach(groupId => {
-                  groupId = groupId.replace(/\"/g, "");
-                  Room.getGroupNameById(groupId, (err, groupIdObj) => {
-                    socket.emit("renderRooms", groupIdObj);
-                  });
-                });
-              }
-            });
-          }
-        });
-      });
-    });
   });
 };
 
