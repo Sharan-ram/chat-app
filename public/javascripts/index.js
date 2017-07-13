@@ -162,7 +162,7 @@ socket.on("renderRoomContent", obj => {
 });
 
 socket.on("clearConversationDom", roomObj => {
-  console.log("roomObj inside conversation dom " + roomObj);
+  //console.log("roomObj inside conversation dom " + roomObj);
   document.getElementById("textMessages").innerHTML = "";
   let getGroupName = document.getElementById("getGroupName");
   getGroupName.innerHTML = roomObj.groupName;

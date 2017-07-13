@@ -235,13 +235,14 @@ const checkIfUserValid = (user, cb) => {
 
 const fetchUsersFromGroup = socket => {
   socket.on("getUsersInGroup", roomObj => {
-    console.log(roomObj);
-    //console.log(groupName);
+    //console.log("when group name is clicked,i get : " + roomObj.groupName);
     GroupAdmins.getAdminByGroupId(`group:${roomObj.id}`, (err, admin) => {
+      //console.log("room admin is :" + admin);
       if (err) console.log("error retrieving the admin :" + err);
       else {
         let adminOfGroup = admin;
-        getUsersFromGroup.get(`group:${roomObj.id}:users`, (err, usersArr) => {
+        getUsersFromGroup.get(`group:${roomObj.id}`, (err, usersArr) => {
+          //console.log(usersArr);
           if (err) console.log("error retrieving users from a group:" + err);
           else {
             if (socket.username === adminOfGroup) {
