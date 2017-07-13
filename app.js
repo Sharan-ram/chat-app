@@ -201,20 +201,30 @@ const saveGroupToAdder = (groupName, socket) => {
   });
 };
 
-const saveGroupToAddedUser = (user, groupName, socket) => {
-  Room.getCurrentId(id => {
+const saveGroupToAddedUser = (user, roomObj, socket) => {
+  checkForRoomObj(roomObj, id => {
     getUserGroups.save(user, `group:${id}`, (err, res) => {
       if (err) console.log("err saving room to added");
       else {
         getSocketDetailByUsername(user, socketObj => {
           if (socketObj) {
-            console.log(socketObj.socket.username + " is also online");
+            //console.log(socketObj.socket.username + " is also online");
             getGroups(socketObj.socket);
           }
         });
       }
     });
   });
+};
+
+const checkForRoomObj = (roomObj, cb) => {
+  if (typeof roomObj === "string") {
+    Room.getCurrentId(id => {
+      cb(id);
+    });
+  } else {
+    cb(roomObj.id);
+  }
 };
 
 const saveNewUsersToGroupUsersArr = (groupName, socket, user) => {
@@ -289,30 +299,17 @@ const deleteUser = socket => {
 };
 
 const addNewUser = socket => {
-  socket.on("addNewUserToGroup", user => {
+  socket.on("addNewUserToGroup", (user, roomObj) => {
     User.getByName(user, (err, userDetails) => {
       if (userDetails.id) {
         getUsersFromGroup.get(`${socket.room}:users`, (err, usersArr) => {
           if (usersArr.indexOf(user) === -1) {
-            getUsersFromGroup.save(`${socket.room}:users`, user);
-            getUserGroups.save(user, socket.room, (err, res) => {
-              if (err) console.log("error saving new user :" + err);
-            });
-            getUsersFromGroup.get(`${socket.room}:users`, (err, userArr) => {
-              GroupAdmins.getAdminByGroupId(`${socket.room}`, (err, admin) => {
-                socket.emit("adminsView", socket.room, admin, userArr);
+            getUsersFromGroup.save(socket.room, user);
+            GroupAdmins.getAdminByGroupId(socket.room, (err, admin) => {
+              getUsersFromGroup.get(`${socket.room}`, (err, userArr) => {
+                console.log(roomObj, admin, userArr);
+                adminViewOfUsers(socket, roomObj, admin, userArr);
               });
-            });
-            getSocketDetailByUsername(user, socketObj => {
-              if (socketObj) {
-                getUserGroups.get(user, (err, groupArr) => {
-                  if (err) console.log(err);
-                  else {
-                    //console.log(groupArr);
-                    socketObj.socket.emit("renderRooms", groupArr);
-                  }
-                });
-              }
             });
           }
         });

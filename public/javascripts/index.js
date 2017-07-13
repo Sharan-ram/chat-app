@@ -61,6 +61,7 @@ socket.on("usersView", (roomObj, admin, usersArr) => {
 });
 
 const viewForAdmin = (roomObj, admin, usersArr) => {
+  //console.log(roomObj.id + " inside viewForAdmin");
   deleteGroupButtonDiv.innerHTML = "";
   exitGroupButtonDiv.innerHTML = "";
   addUserButtonDivForAdmin.innerHTML = "";
@@ -91,7 +92,10 @@ const viewForAdmin = (roomObj, admin, usersArr) => {
     `<a class = "button is-danger" id="deleteGroupButton" onclick = "deleteGroupButtonClicked(\`` +
     roomObj +
     `\`)">Delete Group</a>`;
-  addUserButtonDivForAdmin.innerHTML = `<a class = "button is-primary" id="addUserButtonForAdmin" onclick = "addUserButtonClicked()">Add User</a>`;
+  addUserButtonDivForAdmin.innerHTML = `<a class = "button is-primary" id="addUserButtonForAdmin">Add User</a>`;
+  addUserButtonForAdmin.onclick = () => {
+    addUserButtonClicked(roomObj);
+  };
 };
 
 const viewForUser = (roomObj, admin, usersArr) => {
@@ -116,6 +120,7 @@ const viewForUser = (roomObj, admin, usersArr) => {
 };
 
 const deleteGroupButtonClicked = roomObj => {
+  console.log(roomObj.id);
   socket.emit("deleteGroupByAdmin", roomObj);
 };
 
@@ -127,17 +132,21 @@ const crossClicked = (user, roomObj) => {
   socket.emit("deleteUserFromGroup", user, roomObj);
 };
 
-const addUserButtonClicked = () => {
+const addUserButtonClicked = roomObj => {
   userContent.innerHTML = `
     <input class = "input" type = "text" id = "userToBeAdded" placeholder = "enter username..">
-      <a class = "button -is-primary" id = "addButton" onclick = "addButtonClicked()">Add</a>
+      <a class = "button -is-primary" id = "addButton">Add</a>
   `;
+  let addButton = document.getElementById("addButton");
+  addButton.onclick = () => {
+    addButtonClicked(roomObj);
+  };
 };
 
-const addButtonClicked = () => {
+const addButtonClicked = roomObj => {
   let userToBeAddedDom = document.getElementById("userToBeAdded");
   userToBeAdded = userToBeAddedDom.value;
-  socket.emit("addNewUserToGroup", userToBeAdded);
+  socket.emit("addNewUserToGroup", userToBeAdded, roomObj);
 };
 
 const toggleModal = () => {
