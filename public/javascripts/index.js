@@ -86,10 +86,7 @@ const viewForAdmin = (roomObj, admin, usersArr) => {
     };*/
   });
 
-  exitGroupButtonDiv.innerHTML =
-    `<a class = "button is-dark" id="exitGroupButton" onclick = "exitGroupButtonClicked(\`` +
-    roomObj +
-    `\`)">Exit group</a>`;
+  exitGroupButtonDiv.innerHTML = `<a class = "button is-dark" id="exitGroupButton" onclick = "exitGroupButtonClicked()">Exit group</a>`;
   deleteGroupButtonDiv.innerHTML = `<a class = "button is-danger" id="deleteGroupButton" onclick = "deleteGroupButtonClicked()">Delete Group</a>`;
   addUserButtonDivForAdmin.innerHTML = `<a class = "button is-primary" id="addUserButtonForAdmin">Add User</a>`;
   addUserButtonForAdmin.onclick = () => {
@@ -112,10 +109,7 @@ const viewForUser = (roomObj, admin, usersArr) => {
       userContent.innerHTML += `<b>` + user + ` -Admin</b><br/>`;
     }
   });
-  exitGroupButtonDiv.innerHTML =
-    `<a class = "button is-danger" id="exitGroupButton" onclick = "exitGroupButtonClicked(\`` +
-    roomObj +
-    `\`)">Exit group</a>`;
+  exitGroupButtonDiv.innerHTML = `<a class = "button is-danger" id="exitGroupButton" onclick = "exitGroupButtonClicked()">Exit group</a>`;
 };
 
 const deleteGroupButtonClicked = () => {
@@ -123,8 +117,8 @@ const deleteGroupButtonClicked = () => {
   socket.emit("deleteGroupByAdmin", "delete");
 };
 
-const exitGroupButtonClicked = roomObj => {
-  socket.emit("exitGroup", roomObj);
+const exitGroupButtonClicked = () => {
+  socket.emit("exitGroup", "exit");
 };
 
 const crossClicked = user => {

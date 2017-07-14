@@ -174,16 +174,18 @@ const createGroup = socket => {
 };
 
 const saveGroupAdmin = (groupName, socket, user) => {
-  GroupAdmins.save(groupName, socket.username, (err, res) => {
-    if (err) console.log("error creating group :" + err);
+  Room.save(groupName, (err, res) => {
+    if (err) console.log("err saving group :" + err);
     else {
-      Room.save(groupName, (err, res) => {
-        if (err) console.log("err saving group :" + err);
-        else {
-          saveGroupToAdder(groupName, socket);
-          saveGroupToAddedUser(user, groupName, socket);
-          saveNewUsersToGroupUsersArr(groupName, socket, user);
-        }
+      Room.getCurrentId(id => {
+        GroupAdmins.save(`group:${id}`, socket.username, (err, res) => {
+          if (err) console.log(err);
+          else {
+            saveGroupToAdder(groupName, socket);
+            saveGroupToAddedUser(user, groupName, socket);
+            saveNewUsersToGroupUsersArr(groupName, socket, user);
+          }
+        });
       });
     }
   });
@@ -328,44 +330,44 @@ const addNewUser = socket => {
 };
 
 const exitFromGroup = socket => {
-  socket.on("exitGroup", groupName => {
-    checkIfAdminExited(socket, groupName, res => {
+  socket.on("exitGroup", str => {
+    checkIfAdminExited(socket, socket.room, res => {
       if (!res) {
-        socket.emit("eventForExitingGroup", groupName, socket.username);
-        getUserGroups.delete(socket.username, groupName);
-        getUsersFromGroup.delete(`${groupName}:users`, socket.username);
+        socket.emit("eventForExitingGroup", str, socket.username);
+        getUserGroups.delete(socket.username, socket.room);
+        getUsersFromGroup.delete(socket.room, socket.username);
 
         getGroups(socket);
         socket.emit("disableInput", socket.username);
-        socket.leave(groupName);
+        socket.leave(socket.room);
         socket.join(defaultRoom);
-      } else {
-        console.log(socket.username + " is the admin");
       }
     });
   });
 };
 
-const checkIfAdminExited = (socket, groupName, cb) => {
+const checkIfAdminExited = (socket, groupId, cb) => {
   //console.log(groupName);
-  GroupAdmins.getAdminByGroupId(groupName, (err, admin) => {
+  GroupAdmins.getAdminByGroupId(groupId, (err, admin) => {
     if (err) console.log("err retrieving admin :" + err);
     else {
       //console.log("admin is " + admin);
       if (socket.username === admin) {
         //console.log(socket.username + " username ");
-        GroupAdmins.changeAdmin(groupName, (err, usersArr) => {
-          GroupAdmins.save(groupName, usersArr[0], (err, res) => {
-            if (err) console.log(err);
+        GroupAdmins.changeAdmin(groupId, (err, usersArr) => {
+          console.log("usersArr is:" + usersArr);
+          GroupAdmins.save(groupId, usersArr[0], (err, res) => {
+            if (err)
+              console.log(err + "error retrieving users Arr inside groupAdmin");
             else console.log(res);
           });
         });
-        socket.emit("eventForExitingGroup", groupName, socket.username);
-        getUserGroups.delete(socket.username, groupName);
-        getUsersFromGroup.delete(`${groupName}:users`, socket.username);
+        socket.emit("eventForExitingGroup", groupId, socket.username);
+        getUserGroups.delete(socket.username, groupId);
+        getUsersFromGroup.delete(groupId, socket.username);
         getGroups(socket);
         socket.emit("disableInput", socket.username);
-        socket.leave(groupName);
+        socket.leave(groupId);
         socket.join(defaultRoom);
         cb(true);
       } else cb(false);

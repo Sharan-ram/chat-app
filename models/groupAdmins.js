@@ -3,10 +3,11 @@ const db = redis.createClient();
 const getUsersFromGroup = require("./getUsersFromGroup.js");
 
 class GroupAdmins {
-  static save(groupName, adder, cb) {
+  static save(groupId, adder, cb) {
+    console.log("inside groupAdmin " + groupId + " " + adder);
     db.incr("groupAdmin:ids", (err, id) => {
       if (err) return cb(err);
-      db.hmset(`groupAdmin:${id}`, "groupId", `group:${id}`, "admin", adder);
+      db.hmset(`groupAdmin:${id}`, "groupId", groupId, "admin", adder);
       db.rpush("groupsAdminSet", JSON.stringify(`groupAdmin:${id}`), cb);
     });
   }
@@ -34,27 +35,31 @@ class GroupAdmins {
     });
   }
 
-  static changeAdmin(groupName, cb) {
+  static changeAdmin(groupId, cb) {
     db.lrange("groupsAdminSet", 0, -1, (err, res) => {
       if (err) console.log("err retrieving groupsAdminSet:" + err);
       else {
         res.forEach(groupAdminId => {
-          //console.log(groupAdminId + " groupAdminId");
-          groupAdminId = groupAdminId.replace(/\"/g, "");
-          db.hgetall(groupAdminId, (err, group) => {
-            //console.log(group + " group");
-            if (groupName === group["groupName"]) {
-              getUsersFromGroup.get(`${groupName}:users`, (err, usersArr) => {
-                if (err) console.log("err retrieving users array:" + err);
-                else {
-                  //console.log(usersArr + " usersArr");
-                  db.del(groupAdminId);
-                  cb(err, usersArr);
-                  //console.log(group["admin"] + " group admin");
+          if (groupAdminId) {
+            //console.log(groupAdminId + " groupAdminId");
+            groupAdminId = groupAdminId.replace(/\"/g, "");
+            db.hgetall(groupAdminId, (err, group) => {
+              if (group) {
+                //console.log(group + " group");
+                if (groupId === group["groupId"]) {
+                  getUsersFromGroup.get(groupId, (err, usersArr) => {
+                    if (err) console.log("err retrieving users array:" + err);
+                    else {
+                      //console.log(usersArr + " usersArr");
+                      db.del(groupAdminId);
+                      cb(err, usersArr);
+                      //console.log(group["admin"] + " group admin");
+                    }
+                  });
                 }
-              });
-            }
-          });
+              }
+            });
+          }
         });
       }
     });
