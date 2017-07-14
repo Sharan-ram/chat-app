@@ -307,6 +307,12 @@ const addNewUser = socket => {
         getUsersFromGroup.get(`${socket.room}:users`, (err, usersArr) => {
           if (usersArr.indexOf(user) === -1) {
             getUsersFromGroup.save(socket.room, user);
+            getUserGroups.save(user, socket.room);
+            getSocketDetailByUsername(user, socketObj => {
+              if (socketObj) {
+                getGroups(socketObj.socket);
+              }
+            });
             GroupAdmins.getAdminByGroupId(socket.room, (err, admin) => {
               getUsersFromGroup.get(`${socket.room}`, (err, userArr) => {
                 console.log(roomObj, admin, userArr);
@@ -368,24 +374,23 @@ const checkIfAdminExited = (socket, groupName, cb) => {
 };
 
 const deleteGroup = socket => {
-  socket.on("deleteGroupByAdmin", groupName => {
-    getUsersFromGroup.get(`${groupName}:users`, (err, usersArr) => {
+  socket.on("deleteGroupByAdmin", str => {
+    getUsersFromGroup.get(socket.room, (err, usersArr) => {
       if (err) console.log("err retrieving users from group :" + err);
       else {
         usersArr.forEach(user => {
-          getUserGroups.delete(user, groupName);
+          getUserGroups.delete(user, socket.room);
         });
+        socket.emit("disableInput", usersArr);
+        socket.emit("disableModal", socket.room);
         usersArr.forEach(user => {
           getSocketDetailByUsername(user, socketObj => {
             if (socketObj) {
-              getUserGroups.get(user, (err, groupArr) => {
-                if (err) console.log(err);
-                else {
-                  //console.log(groupArr);
-                  socketObj.socket.emit("renderRooms", groupArr);
-                  socketObj.socket.leave(groupName);
-                }
-              });
+              getGroups(socketObj.socket);
+              if (socketObj.socket.room === socket.room) {
+                socketObj.socket.emit("disableInput", user);
+              }
+              socketObj.socket.leave(socket.room);
             }
           });
         });

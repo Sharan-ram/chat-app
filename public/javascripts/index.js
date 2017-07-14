@@ -90,10 +90,7 @@ const viewForAdmin = (roomObj, admin, usersArr) => {
     `<a class = "button is-dark" id="exitGroupButton" onclick = "exitGroupButtonClicked(\`` +
     roomObj +
     `\`)">Exit group</a>`;
-  deleteGroupButtonDiv.innerHTML =
-    `<a class = "button is-danger" id="deleteGroupButton" onclick = "deleteGroupButtonClicked(\`` +
-    roomObj +
-    `\`)">Delete Group</a>`;
+  deleteGroupButtonDiv.innerHTML = `<a class = "button is-danger" id="deleteGroupButton" onclick = "deleteGroupButtonClicked()">Delete Group</a>`;
   addUserButtonDivForAdmin.innerHTML = `<a class = "button is-primary" id="addUserButtonForAdmin">Add User</a>`;
   addUserButtonForAdmin.onclick = () => {
     addUserButtonClicked(roomObj);
@@ -121,9 +118,9 @@ const viewForUser = (roomObj, admin, usersArr) => {
     `\`)">Exit group</a>`;
 };
 
-const deleteGroupButtonClicked = roomObj => {
+const deleteGroupButtonClicked = () => {
   //console.log(roomObj.id);
-  socket.emit("deleteGroupByAdmin", roomObj);
+  socket.emit("deleteGroupByAdmin", "delete");
 };
 
 const exitGroupButtonClicked = roomObj => {
@@ -297,3 +294,7 @@ const getClickedGroupName = roomObj => {
   //let getGroupName = document.getElementById("getGroupName").innerHTML;
   socket.emit("getUsersInGroup", roomObj);
 };
+
+socket.on("disableModal", room => {
+  document.getElementById("modal").classList.remove("is-active");
+});
