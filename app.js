@@ -20,7 +20,6 @@ const messageContent = require("./models/messageContent");
 const User = require("./models/user");
 const chat = require("./routes/index.js");
 const GroupAdmins = require("./models/groupAdmins");
-const DeleteUser = require("./models/deleteUser");
 const cookieParser = require("cookie-parser");
 const sharedsession = require("express-socket.io-session");
 const Room = require("./models/room");
