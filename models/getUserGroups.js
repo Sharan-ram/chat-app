@@ -6,8 +6,8 @@ class getUserGroups {
     db.lpush(username, groupId, cb);
   }
 
-  static delete(username, group) {
-    db.lrem(username, 1, group);
+  static delete(username, groupId) {
+    db.lrem(username, 1, groupId);
   }
 
   static get(username, cb) {

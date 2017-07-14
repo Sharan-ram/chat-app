@@ -274,27 +274,29 @@ const normalUsersView = (socket, roomObj, admin, usersArr) => {
 };
 
 const deleteUser = socket => {
-  socket.on("deleteUserFromGroup", (user, groupName) => {
-    getUsersFromGroup.delete(`${groupName}:users`, user);
-    getUserGroups.delete(user, groupName);
-    getUsersFromGroup.get(`${groupName}:users`, (err, userArr) => {
-      GroupAdmins.getAdminByGroupId(`${groupName}`, (err, admin) => {
-        socket.emit("adminsView", groupName, admin, userArr);
-      });
-      getUserGroups.get(user, (err, groupArr) => {
-        getSocketDetailByUsername(user, socketObj => {
-          if (socketObj) {
-            socketObj.socket.emit("renderRooms", groupArr);
-            if (socketObj.socket.room === groupName) {
-              socketObj.socket.emit("disableInput", user);
-              socketObj.socket.leave(groupName);
-              socketObj.socket.join(defaultRoom);
-            }
-          }
+  socket.on("deleteUserFromGroup", user => {
+    //console.log(user, roomObj);
+    getUsersFromGroup.delete(socket.room, user);
+    getUserGroups.delete(user, socket.room);
+    getUsersFromGroup.get(socket.room, (err, userArr) => {
+      GroupAdmins.getAdminByGroupId(socket.room, (err, admin) => {
+        Room.getGroupNameById(socket.room, (err, roomObj) => {
+          socket.emit("adminsView", roomObj, admin, userArr);
         });
       });
+
+      getSocketDetailByUsername(user, socketObj => {
+        if (socketObj) {
+          getGroups(socketObj.socket);
+          if (socketObj.socket.room === socket.room) {
+            socketObj.socket.emit("disableInput", user);
+            socketObj.socket.leave(socket.room);
+            socketObj.socket.join(defaultRoom);
+          }
+        }
+      });
     });
-    socket.emit("eventForDeletingUser", groupName, user);
+    socket.emit("eventForDeletingUser", socket.room, user);
   });
 };
 

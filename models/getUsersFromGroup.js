@@ -6,8 +6,8 @@ class getUsersFromGroup {
     db.rpush(`${groupId}:users`, added, adder);
   }
 
-  static delete(groupName, user) {
-    db.lrem(groupName, 1, user);
+  static delete(groupId, user) {
+    db.lrem(`${groupId}:users`, 1, user);
   }
 
   static get(groupId, cb) {
