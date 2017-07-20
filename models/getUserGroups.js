@@ -1,20 +1,20 @@
-const redis = require("redis");
-const db = redis.createClient();
+const redis = require('redis')
+const db = redis.createClient()
 
 class getUserGroups {
-  static save(username, groupId, cb) {
-    db.lpush(username, groupId, cb);
+  static save (username, groupId, cb) {
+    db.lpush(username, groupId, cb)
   }
 
-  static delete(username, groupId) {
-    db.lrem(username, 1, groupId);
+  static delete (username, groupId) {
+    db.lrem(username, 1, groupId)
   }
 
-  static get(username, cb) {
-    db.lrange(username, 0, -1, cb);
+  static get (username, cb) {
+    db.lrange(username, 0, -1, cb)
   }
 }
-module.exports = getUserGroups;
+module.exports = getUserGroups
 
 /*
 getUserGroups.save("mahesh", "t50", (err, res) => {
