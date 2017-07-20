@@ -1,6 +1,6 @@
 const redis = require('redis')
 const bcrypt = require('bcrypt')
-const db = redis.createClient()
+const db = redis.createClient(process.env.REDIS_URL)
 
 class User {
   // storing a user to a database

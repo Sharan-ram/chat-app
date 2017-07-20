@@ -412,6 +412,6 @@ const getIndexOfSocketObjByUsername = (socket, cb) => {
   })
 }
 
-http.listen(port, () => {
+http.listen(process.env.PORT || port, () => {
   console.log('listening on port :', port)
 })
